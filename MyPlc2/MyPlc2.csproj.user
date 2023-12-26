@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <_LastSelectedProfileId>D:\Users\y\source\repos\MyPlc2\Properties\PublishProfiles\FolderProfile.pubxml</_LastSelectedProfileId>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Update="Main.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="ScottPlot\ScottPlot.WinForms\FormHelp.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="ScottPlot\ScottPlot.WinForms\FormsPlot.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="ScottPlot\ScottPlot.WinForms\FormsPlotLegendViewer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="ScottPlot\ScottPlot.WinForms\FormsPlotViewer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="ScottPlot\ScottPlot.WinForms\PlotObjectEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="siemens_IO.cs">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
+</Project>
