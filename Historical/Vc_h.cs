@@ -96,7 +96,7 @@ namespace Historical
             PlotArray.Add(address, scatterPlot);
         }
 
-        public override void Read()
+        public override int Read()
         {
             throw new NotImplementedException();
         }

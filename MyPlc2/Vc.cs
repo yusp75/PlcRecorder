@@ -106,7 +106,7 @@ namespace MyPlc2
         public int Axis_01_Count { get; set; } = 0; //值0-1
 
         //抽象类
-        public abstract void Read();
+        public abstract int Read();
         public enum Areas
         {
             PE = 0x81,

@@ -1,28 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Drawing;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Diagnostics;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Sharp7;
+
 
 namespace MyPlc2
 {
     public partial class siemens400 : Form
     {
         private bool isConnected = false;
-        private readonly S7Client client = new S7Client();
+        private S7Client? Client;
         private bool inEdit = false;
         private readonly string config_path = System.AppDomain.CurrentDomain.BaseDirectory + "\\config\\";
+
+        private string ip;
+        private int slot;
+
         public delegate void SendMsg(bool isApplied);
         public SendMsg sendMsg;
 
@@ -32,6 +25,27 @@ namespace MyPlc2
         {
             InitializeComponent();
 
+            //生成配置文件目录
+            if (!Directory.Exists(config_path))
+            {
+                Directory.CreateDirectory(this.config_path);
+            }
+            //读取PLC连接
+            if (File.Exists(this.config_path + "plc.json"))
+            {
+                using StreamReader reader = new(this.config_path + "\\plc.json");
+                string s = reader.ReadLine();
+
+                //PlcConnect connect = new();
+                //var obj = JsonConvert.DeserializeObject(s);
+                var obj = JObject.Parse(s);
+                if (obj != null)
+                {
+                    this.ip = obj.GetValue("ip").ToString();
+                    this.slot = (int)obj.GetValue("slot");
+                }
+
+            }
         }
 
         private void btnConnect_Click(object sender, EventArgs e)
@@ -47,49 +61,60 @@ namespace MyPlc2
             int rack = 0;
             int slot = (int)this.txtSlot.Value;
             //this.client.SetConnectionType(0x02);
-            this.client.ConnTimeout = 5;
+            Client = new();
+            Client.ConnTimeout = 5;
 
             if (!this.isConnected)
             {
-                int code = this.client.ConnectTo(ip, rack, slot);
+                int code = this.Client.ConnectTo(ip, rack, slot);
                 if (code > 0)
                 {
                     //MessageBox.Show("连接失败：" + this.client.ErrorText(code));
-                    log.Error("连接失败：" + this.client.ErrorText(code));
+                    log.Error("连接失败：" + this.Client.ErrorText(code));
                 }
 
-                this.isConnected = this.client.Connected;
+                this.isConnected = this.Client.Connected;
                 if (this.isConnected)
                 {
+                    this.ip = ip;
+                    this.slot = slot;
+
                     this.UpdateLblStatus("已连接", Color.FromArgb(0, 255, 0));
+
                 }
             }
 
         }
 
+        public void TryConnect()
+        {
+            int rack = 0;
+            if (Client != null)
+            {
+                Client = null;
+            }
+
+            Client = new();
+            this.Client.ConnTimeout = 5;
+
+            if (!Client.Connected)
+            {
+                int code = this.Client.ConnectTo(this.ip, rack, this.slot);
+                if (code > 0)
+                {
+                    log.Error("尝试连接失败：" + this.Client.ErrorText(code));
+                }
+
+                this.isConnected = this.Client.Connected;
+            }
+        }
+
         private void siemens400_Activated(object sender, EventArgs e)
         {
-            //窗体激活
+            //窗体激活           
 
-            //生成配置文件目录
-            if (!Directory.Exists(config_path))
-            {
-                Directory.CreateDirectory(this.config_path);
-            }
-
-            //读取PLC连接
-            if (File.Exists(this.config_path + "plc.json"))
-            {
-                using StreamReader reader = new(this.config_path + "\\plc.json");
-                string s = reader.ReadLine();
-
-                //PlcConnect connect = new();
-                //var obj = JsonConvert.DeserializeObject(s);
-                var obj = JObject.Parse(s);
-                txtIP.Text = obj.GetValue("ip").ToString();
-                txtSlot.Text = obj.GetValue("slot").ToString();
-
-            }
+            txtIP.Text = this.ip;
+            txtSlot.Text = this.slot.ToString();
 
             //读取变量到数据表格
             if (File.Exists(this.config_path + "vars.json"))
@@ -126,12 +151,12 @@ namespace MyPlc2
 
         public bool GetConnected()
         {
-            return client.Connected;
+            return Client.Connected;
         }
 
         public S7Client GetClient()
         {
-            return this.client;
+            return this.Client;
         }
 
 

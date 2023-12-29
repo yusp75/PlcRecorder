@@ -51,12 +51,14 @@ namespace MyPlc2
 
                         //使用锁信号
                         mutex.WaitOne();
-                        if (Client != null || Client.Connected)
+                        if (Client != null && Client.Connected)
                         {
-                            vc.Read();
-                            string address = vc.Address;
-                            double value = vc.Value;
-                            OnRaiseReadEvent(address, value);
+                            if (vc.Read() == 0)
+                            {
+                                string address = vc.Address;
+                                double value = vc.Value;
+                                OnRaiseReadEvent(address, value);
+                            }
                         }
                         mutex.ReleaseMutex();
 
@@ -115,30 +117,30 @@ namespace MyPlc2
             var streamer = plt.AddDataStreamer(length: 50);
             streamer.ViewScrollLeft();
             streamer.Label = MRecord.Address;
-            plt.YAxis.Color(streamer.Color);
+            //赋轴值给新加图形
+            streamer.YAxisIndex = plt.YAxis.AxisIndex;
 
-            streamer.YAxisIndex = 0;
-            //备份轴limits
-            AxisLitmits = plt.GetAxisLimits(0);
+            //采样周期
+            streamer.SamplePeriod = 0.01;
+            plt.YAxis.Color(streamer.Color);
 
             //布尔值，则绘制stepline
             if (Check01(MRecord.Address))
             {
                 streamer.Renderer.StepDisplay = true;
-                //plt.SetAxisLimitsY(0, 50);
-                plt.SetAxisLimits(yMin: 0, yMax: 50, yAxisIndex: 0);
-                Axis_01 = plt.LeftAxis;
+                plt.SetAxisLimitsY(0, 50, 0);
+                Axis_01 = plt.YAxis;
+
                 Axis_01_Count++;
             }
             else
             {
+                plt.SetAxisLimitsY(0, 100, 0);
                 Axis_lg_Count++;
             }
-            //采样周期
-            streamer.SamplePeriod = 0.01;
 
             StreamerArray[MRecord.Address] = streamer;
-
+            MFormsPlot.Refresh();
         }
 
         //拖放：加streamer 2
@@ -160,14 +162,12 @@ namespace MyPlc2
                 {
                     Axis_01 = plt.AddAxis(Edge.Left);
                     Axis_01.Color(streamer.Color);
-                    
+                    plt.SetAxisLimitsY(0, 50, Axis_01.AxisIndex);
                 }
 
                 streamer.Renderer.StepDisplay = true;
                 streamer.OffsetY = 2 * Axis_01_Count;
-
                 streamer.YAxisIndex = Axis_01.AxisIndex;
-                plt.SetAxisLimitsY(0, 50, Axis_01.AxisIndex);
 
                 Axis_01_Count++;
             }
@@ -176,39 +176,44 @@ namespace MyPlc2
                 var axis = plt.AddAxis(Edge.Left);
                 axis.Color(streamer.Color);
                 streamer.YAxisIndex = axis.AxisIndex;
-                plt.SetAxisLimitsY(-100, 100, axis.AxisIndex);
-
                 streamer.OffsetY = 10 * Axis_lg_Count + BASE_LINE;
-                
+                plt.SetAxisLimitsY(0, 100, axis.AxisIndex);
 
                 Axis_lg_Count++;
             }
-            //赋轴值给新加图形
-            streamer.YAxisIndex = plt.YAxis.AxisIndex;
 
             StreamerArray[address] = streamer;
 
+            MFormsPlot.Refresh();
         }
 
 
-        public override void Read()
+        public override int Read()
         {
-            //启动采集
+            //读PLC
+            int code = -1;
+            if (Client == null) return code;
+
             Record r = MRecord;
             int pos = -1;
             if (Check01(r.Address))
             {
                 pos = r.Bit_pos;
             }
-            //ReadArea(int Area, int DBNumber, int Start, int Amount, int WordLen, byte[] Buffer)
-            byte[] data = new byte[S7.DataSizeByte(r.WordLen)];
 
-            int code = Client.ReadArea(r.Area, r.Db_number, r.Start, 1, r.WordLen, data);
-            if (code != 0)
+            //ReadArea(int Area, int DBNumber, int Start, int Amount, int WordLen, byte[] Buffer)
+
+            byte[] data = new byte[S7.DataSizeByte(r.WordLen)];
+            try
             {
-                Debug.WriteLine("Vc.Read, ReadArea: " + Client.ErrorText(code));
+                code = Client.ReadArea(r.Area, r.Db_number, r.Start, 1, r.WordLen, data);
             }
-            else
+            catch (Exception ex)
+            {
+                return code;
+            }
+
+            if (code == 0)
             {
                 string raw_value = ByteArrayToString(data);
                 double value = CalByteArray(data, r.WordLen, pos);
@@ -240,11 +245,9 @@ namespace MyPlc2
                     Debug.WriteLine("Vc.Read, db wrtie: " + e.ToString());
                 }
 
-                //plot
-                //Refresh();
-
             }
 
+            return code;
         }
 
         public void UpdateData(MPoint points)
@@ -272,23 +275,17 @@ namespace MyPlc2
             foreach (var streamer in StreamerArray)
             {
                 //只接收地址相同
-                try
+                if (address != null)
                 {
                     if (address.Equals(streamer.Key, StringComparison.OrdinalIgnoreCase))
                     {
                         streamer.Value.Add(value);
                     }
                 }
-                catch (NullReferenceException)
-                {
-                    throw new Exception("空指针：vc_d, L250");
-                }
             }
             //更新
             Refresh();
         }
-
-
 
         //
     }

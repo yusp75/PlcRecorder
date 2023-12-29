@@ -27,7 +27,7 @@ namespace MyPlc2
         private List<Record> records = new();
         private Dictionary<string, Vc_d> vcs = new();
 
-        private int countOfClientLost = 0;
+        private int CountOfClientLost = 0;
 
         private MTreeView mTreeView = new();
 
@@ -123,7 +123,7 @@ namespace MyPlc2
 
             try
             {
-                io.Connect();
+                io.TryConnect();
                 this.client = io.GetClient();
             }
             catch (Exception ex)
@@ -235,16 +235,20 @@ namespace MyPlc2
             {
                 if (!client.Connected)
                 {
-                    io.Connect();
-                    countOfClientLost++;
-                    if (countOfClientLost % 10 == 0)
+                    io.TryConnect();
+                    this.client = io.GetClient();
+                    if (this.client.Connected) { CountOfClientLost = 0; }
+                    else { }
+                    CountOfClientLost++;
+                    if (CountOfClientLost % 10 == 0)
                     {
-                        Debug.WriteLine("PLC连接丢失：" + countOfClientLost.ToString());
+                        Debug.WriteLine("PLC连接丢失：" + CountOfClientLost.ToString());
                     }
                 }
                 Thread.Sleep(5000);
             }
         }
+
 
         //程序窗口尺寸
         private void ChangeScreenSize()
