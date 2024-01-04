@@ -238,11 +238,13 @@ namespace MyPlc2
                     io.TryConnect();
                     this.client = io.GetClient();
                     if (this.client.Connected) { CountOfClientLost = 0; }
-                    else { }
-                    CountOfClientLost++;
-                    if (CountOfClientLost % 10 == 0)
+                    else
                     {
-                        Debug.WriteLine("PLC连接丢失：" + CountOfClientLost.ToString());
+                        CountOfClientLost++;
+                        if (CountOfClientLost % 10 == 0)
+                        {
+                            Debug.WriteLine("PLC连接丢失：" + CountOfClientLost.ToString());
+                        }
                     }
                 }
                 Thread.Sleep(5000);

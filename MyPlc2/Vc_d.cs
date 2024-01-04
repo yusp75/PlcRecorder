@@ -115,6 +115,7 @@ namespace MyPlc2
 
             //类型：DataStreamer
             var streamer = plt.AddDataStreamer(length: 50);
+            //streamer.ManageAxisLimits = false;
             streamer.ViewScrollLeft();
             streamer.Label = MRecord.Address;
             //赋轴值给新加图形
@@ -152,6 +153,7 @@ namespace MyPlc2
             var plt = MFormsPlot.Plot;
 
             var streamer = plt.AddDataStreamer(length: 50);
+            //streamer.ManageAxisLimits=false; 
             streamer.ViewScrollLeft();
             streamer.Label = address;
             streamer.SamplePeriod = 0.01;
@@ -163,11 +165,12 @@ namespace MyPlc2
                     Axis_01 = plt.AddAxis(Edge.Left);
                     Axis_01.Color(streamer.Color);
                     plt.SetAxisLimitsY(0, 50, Axis_01.AxisIndex);
-                }
+                }             
+                
+                streamer.YAxisIndex = Axis_01.AxisIndex;
+                streamer.OffsetY = 2 * Axis_01_Count;
 
                 streamer.Renderer.StepDisplay = true;
-                streamer.OffsetY = 2 * Axis_01_Count;
-                streamer.YAxisIndex = Axis_01.AxisIndex;
 
                 Axis_01_Count++;
             }
@@ -175,9 +178,10 @@ namespace MyPlc2
             {
                 var axis = plt.AddAxis(Edge.Left);
                 axis.Color(streamer.Color);
-                streamer.YAxisIndex = axis.AxisIndex;
-                streamer.OffsetY = 10 * Axis_lg_Count + BASE_LINE;
                 plt.SetAxisLimitsY(0, 100, axis.AxisIndex);
+
+                streamer.YAxisIndex = axis.AxisIndex;
+                streamer.OffsetY = 10 * Axis_lg_Count + BASE_LINE;                
 
                 Axis_lg_Count++;
             }

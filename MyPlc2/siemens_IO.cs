@@ -91,7 +91,7 @@ namespace MyPlc2
             int rack = 0;
             if (Client != null)
             {
-                Client = null;
+                //Client = null;
             }
 
             Client = new();

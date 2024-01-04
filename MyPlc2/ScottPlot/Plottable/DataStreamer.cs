@@ -207,7 +207,7 @@ public class DataStreamer : IPlottable, IHasLine, IHasColor
             AxisLimits limits = Plot.GetAxisLimits(XAxisIndex, YAxisIndex);
             AxisLimits dataLimits = GetAxisLimits();
             AxisLimits newLimits = AxisManager.GetAxisLimits(limits, dataLimits);
-            Plot.SetAxisLimits(newLimits);
+            Plot.SetAxisLimits(newLimits, yAxisIndex:YAxisIndex);
         }
 
         Renderer.Render(dims, bmp, lowQuality);
