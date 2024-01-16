@@ -9,11 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LiveChartsCore" Version="2.0.0-rc2" />
-    <PackageReference Include="LiveChartsCore.SkiaSharpView.WinForms" Version="2.0.0-rc2" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\MyPlc2\MyPlc2.csproj" />
   </ItemGroup>
 
