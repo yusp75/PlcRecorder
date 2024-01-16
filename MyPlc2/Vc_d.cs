@@ -128,7 +128,10 @@ namespace MyPlc2
             //布尔值，则绘制stepline
             if (Check01(MRecord.Address))
             {
-                streamer.Renderer.StepDisplay = true;
+                streamer.Renderer.StepDisplay = true;                
+                plt.YAxis.SetBoundary(0, 50);
+                plt.YAxis.SetInnerBoundary(0, 20);
+                MFormsPlot.Configuration.Zoom = false;
                 plt.SetAxisLimitsY(0, 50, 0);
                 Axis_01 = plt.YAxis;
 
@@ -164,9 +167,11 @@ namespace MyPlc2
                 {
                     Axis_01 = plt.AddAxis(Edge.Left);
                     Axis_01.Color(streamer.Color);
+                    Axis_01.SetBoundary(0, 50);
+                    Axis_01.SetInnerBoundary(0, 10);
                     plt.SetAxisLimitsY(0, 50, Axis_01.AxisIndex);
-                }             
-                
+                }
+
                 streamer.YAxisIndex = Axis_01.AxisIndex;
                 streamer.OffsetY = 2 * Axis_01_Count;
 
@@ -181,7 +186,7 @@ namespace MyPlc2
                 plt.SetAxisLimitsY(0, 100, axis.AxisIndex);
 
                 streamer.YAxisIndex = axis.AxisIndex;
-                streamer.OffsetY = 10 * Axis_lg_Count + BASE_LINE;                
+                streamer.OffsetY = 10 * Axis_lg_Count + BASE_LINE;
 
                 Axis_lg_Count++;
             }
@@ -232,10 +237,6 @@ namespace MyPlc2
                     DataStreamer streamer = StreamerArray[r.Address];
                     //增加y值
                     streamer?.Add(value);
-                }
-                if (r.Address == "q0.0")
-                {
-                    Debug.WriteLine("Vc.Read:{0},{1},{2}", r.Address, value, Value);
                 }
 
                 //db
