@@ -9,6 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ScottPlot" Version="5.0.20" />
+    <PackageReference Include="ScottPlot.WinForms" Version="5.0.20" />
+    <PackageReference Include="SkiaSharp" Version="2.88.7" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\MyPlc2\MyPlc2.csproj" />
   </ItemGroup>
 

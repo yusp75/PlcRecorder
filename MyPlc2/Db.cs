@@ -92,11 +92,12 @@ namespace MyPlc2
                             try
                             {
                                 DateTime t = ((NodaTime.Instant)record.GetValueByKey("_time")).ToDateTimeUtc();
-                                t = t.AddHours(UTC_OFFSET);
+                                //t = t.AddHours(UTC_OFFSET);
+                                t = t.ToLocalTime();
 
-                                double tt = t.ToOADate();
+                                //double tt = t.ToOADate();
                                 double v = (double)record.GetValueByKey("value");
-                                points.AddPoint(tt, v);
+                                points.AddPoint(t, v);
                             }
                             catch (Exception e)
                             {

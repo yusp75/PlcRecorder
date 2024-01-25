@@ -2,9 +2,12 @@
 using System.Text.RegularExpressions;
 using Sharp7;
 using System.Diagnostics;
-using ScottPlot.Plottable;
 using ScottPlot;
-using ScottPlot.Renderable;
+using ScottPlot.WinForms;
+using ScottPlot.AxisPanels;
+using ScottPlot.Plottables;
+using static Python.Runtime.TypeSpec;
+using ScottPlot.Colormaps;
 
 namespace MyPlc2
 {
@@ -60,7 +63,7 @@ namespace MyPlc2
 
     public class MPoint
     {
-        public List<double> x { get; } = new();
+        public List<DateTime> x { get; } = new();
         public List<double> y { get; } = new();
 
         public MPoint()
@@ -69,7 +72,7 @@ namespace MyPlc2
             //y.Add(0.0);
         }
 
-        public void AddPoint(double time, double value)
+        public void AddPoint(DateTime time, double value)
         {
             this.x.Add(time);
             this.y.Add(value);
@@ -79,16 +82,16 @@ namespace MyPlc2
     public class MAxis
     {
         public int Count { get; set; }
-        public Axis MyAxis { get; set; }
+        public LeftAxis MyLeftAxis { get; set; }
 
         public MAxis()
         {
         }
 
-        public MAxis(int count, Axis myAxis)
+        public MAxis(int count, LeftAxis myLeftAxis)
         {
             this.Count = count;
-            this.MyAxis = myAxis;
+            this.MyLeftAxis = myLeftAxis;
         }
 
     }
@@ -140,17 +143,17 @@ namespace MyPlc2
                 //拖放
                 AllowDrop = true
             };
+
             MFormsPlot.DragEnter += MFormsPlot_DragEnter;
             MFormsPlot.DragOver += MFormsPlot_DragOver;
             MFormsPlot.DragDrop += MFormsPlot_DragDrop;
 
             //Y轴偏移
-            var s = MFormsPlot.Plot.AddSignal(new double[] { });
-            s.OffsetY = 10;
+            //var s = MFormsPlot.Plot.Add.Scatter<double, double>(new double[] { }, new double[] { });
+            //s.OffsetY = 10;
 
-            var legend = MFormsPlot.Plot.Legend(enable: true);
-            legend.Location = Alignment.UpperLeft;
-            legend.Orientation = ScottPlot.Orientation.Vertical;
+            //var legend = MFormsPlot.Plot.Legend;
+            //legend.Location = Alignment.UpperLeft;
         }
 
         private void MFormsPlot_DragOver(object? sender, DragEventArgs e)
@@ -186,8 +189,6 @@ namespace MyPlc2
         {
             //Plot标题
             MFormsPlot.Plot.Title(MRecord.Name + "-" + MRecord.Address);
-            //x轴使用时间格式
-            MFormsPlot.Plot.XAxis.DateTimeFormat(true);
         }
 
         public static List<Record> Parse()
@@ -419,36 +420,33 @@ namespace MyPlc2
             return address.Contains('i') || address.Contains('q') || address.Contains('m') || address.Contains("dbx");
         }
 
-        public int WhichAxis(string address, MPoint points)
+        public LeftAxis WhichAxis(string address, MPoint points)
         {
             int LimitZeroOne = 50;
             int index = CalIndex(address, points);
 
             if (!Axises.ContainsKey(index))
             {
+                var plot = MFormsPlot.Plot;
+
                 MAxis mAxis = new();
-                Axis axis = mAxis.MyAxis;
-                var plt = MFormsPlot.Plot;
-
-                //主画面加轴
-                axis ??= plt.AddAxis(Edge.Left);
-
-                Axises.Add(index, mAxis);
-                Axises[index].MyAxis = axis;
+                LeftAxis axis = plot.Axes.AddLeftAxis();
 
                 //设置轴极限                
                 if (index == 1)
                 {
-                    plt.SetAxisLimitsY(0, LimitZeroOne, axis.AxisIndex);
+                    plot.Axes.SetLimitsY(0, LimitZeroOne, axis);
                 }
                 else
                 {
-                    plt.SetAxisLimitsY(-1 * index, index, axis.AxisIndex);
-
+                    plot.Axes.SetLimitsY(-1 * index, index, axis);
                 }
+
+                mAxis.MyLeftAxis = axis;
+                Axises.Add(index, mAxis);
             }
 
-            return Axises[index].MyAxis.AxisIndex;
+            return Axises[index].MyLeftAxis;
         }
         //根据点计算轴极限
         public int CalIndex(string address, MPoint points)
@@ -482,43 +480,62 @@ namespace MyPlc2
         }
 
         //设置图形
-        public void SetupPlot(int idx, ref ScatterPlot scatterPlot, int space = 3)
+        public void SetupPlot(int idx, ref Scatter subPlot, int space = 3)
         {
             int base_line = 50;
-            int axis_index = Axises[idx].MyAxis.AxisIndex;
-            var plt = MFormsPlot.Plot;
+
+            var my_axis = Axises[idx].MyLeftAxis;
+            var plot = MFormsPlot.Plot;
+
             //plt.AddCrosshair(30, 0.36);
             //图形与轴颜色
             if (Axises.ContainsKey(idx))
             {
-                Axises[idx].MyAxis.Color(scatterPlot.Color);
+                Axises[idx].MyLeftAxis.Color(subPlot.Color);
             }
 
             if (idx == 1)
             {
-                plt.SetAxisLimitsY(0, 50, axis_index);
-                //plt.YAxis.TickDensity(1);
-                //plt.YAxis.SetZoomInLimit(1);
-                //plt.YAxis.SetZoomOutLimit(10);
+                plot.Axes.SetLimitsY(0, 50, my_axis);
+                //Y轴禁用zoom
+
+                subPlot.ConnectStyle = ConnectStyle.StepHorizontal;
+                subPlot.MarkerStyle = MarkerStyle.None;
 
                 Axis_01_Count++;
 
-                scatterPlot.StepDisplay = true;
-                scatterPlot.MarkerShape = MarkerShape.none;
-                scatterPlot.OffsetY = space * Axis_01_Count;
+                //subPlot.Data.YOffset = space * Axis_01_Count;
             }
             else
             {
-                plt.SetAxisLimitsY(-1 * idx, idx, axis_index);
                 Axis_lg_Count++;
 
-                scatterPlot.OffsetY = space * Axis_lg_Count + base_line;
+                //subPlot.Data.YOffset = space * Axis_lg_Count + base_line;
+                plot.Axes.SetLimitsY(-1 * idx, idx, my_axis);
             }
         }
 
         public void AddToAxises(int key)
         {
-            Axises.Add(key, new MAxis(0, MFormsPlot.Plot.YAxis));
+            Axises.Add(key, new MAxis(0, MFormsPlot.Plot.Axes.AddLeftAxis()));
+        }
+
+        public static Pixel[] GetStepDisplayPoints(Pixel[] points, bool right)
+        {
+            Pixel[] pointsStep = new Pixel[points.Length * 2 - 1];
+
+            int offsetX = right ? 1 : 0;
+            int offsetY = right ? 0 : 1;
+
+            for (int i = 0; i < points.Length - 1; i++)
+            {
+                pointsStep[i * 2] = points[i];
+                pointsStep[i * 2 + 1] = new Pixel(points[i + offsetX].X, points[i + offsetY].Y);
+            }
+
+            pointsStep[pointsStep.Length - 1] = points[points.Length - 1];
+
+            return pointsStep;
         }
 
         //

@@ -2,6 +2,7 @@ using ScottPlot;
 using Serilog;
 using Sharp7;
 using System.Diagnostics;
+using ScottPlot.WinForms;
 
 namespace MyPlc2
 {
@@ -85,7 +86,7 @@ namespace MyPlc2
             Debug.WriteLine(name + " " + address);
             try
             {
-                ScottPlot.FormsPlot d = vcs[address].MFormsPlot;
+                FormsPlot d = vcs[address].MFormsPlot;
                 //  ≈‰øÌ∂»
                 d.Anchor = AnchorStyles.Left;
                 d.Dock = DockStyle.Fill;
@@ -210,7 +211,7 @@ namespace MyPlc2
         private void ChangeBgColor(bool a, bool b)
         {
             if (a)
-                action_start.BackColor = Color.Green;
+                action_start.BackColor = System.Drawing.Color.Green;
             else
                 action_start.BackColor = SystemColors.Control;
         }

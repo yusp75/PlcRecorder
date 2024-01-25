@@ -1,8 +1,9 @@
-using ScottPlot;
 using Serilog;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using MyPlc2;
+using ScottPlot;
+using ScottPlot.WinForms;
 
 namespace Historical
 {
@@ -58,7 +59,7 @@ namespace Historical
 
             //初始化时间范围
             DateTime dt = DateTime.Now;
-            DtStart.Value = dt.AddMinutes(-540);
+            DtStart.Value = dt.AddMinutes(-30);
             //DtStart.Value = dt.AddDays(-1);
             DtStop.Value = dt;
 
@@ -106,16 +107,18 @@ namespace Historical
         //响应：树形菜单双击
         private void DblClicHandler(string name, string address)
         {
-            Log.Information(name + " " + address);
-            //Debug.WriteLine(name + " " + address);
+            //Log.Information(name + " " + address);
+            Debug.WriteLine(name + " " + address);
             try
-            {
-                vcs[address].AddPlot();
-
+            {     
                 FormsPlot d = vcs[address].MFormsPlot;
+                d.Plot.Axes.DateTimeTicks(Edge.Bottom);
                 d.Anchor = AnchorStyles.Left;
-                d.Dock = DockStyle.Fill;
+                d.Dock = DockStyle.Fill;                
+                //d.Size = new(600, 400);
                 table1.Controls.Add(d);
+
+                vcs[address].AddPlot();
 
             }
             catch (KeyNotFoundException ex)
@@ -134,11 +137,13 @@ namespace Historical
         {
             //按钮：查询
             Db db = new();
+
             //var a = NodaTime.Instant.FromDateTimeUtc(DtStart.Value);
             //string dt1=NodaTime.Instant.FromDateTimeUtc(DtStart.Value).ToString();
             //string dt2 = NodaTime.Instant.FromDateTimeUtc(DtStop.Value).ToString();
-            string dt1 = DtStart.Value.ToString("yyyy-MM-ddTHH:mm:ssZ");
-            string dt2 = DtStop.Value.ToString("yyyy-MM-ddTHH:mm:ssZ");
+
+            string dt1 = DtStart.Value.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ");
+            string dt2 = DtStop.Value.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ");
 
             ThreadPool.QueueUserWorkItem((obj) =>
             {
@@ -184,7 +189,7 @@ namespace Historical
         {
             foreach (var v in vcs)
             {
-                v.Value.MFormsPlot.Configuration.ScrollWheelZoom = b;
+                //v.Value.MFormsPlot.Configuration.ScrollWheelZoom = b;
             }
         }
 

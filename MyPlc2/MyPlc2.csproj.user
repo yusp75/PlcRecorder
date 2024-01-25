@@ -7,21 +7,6 @@
     <Compile Update="Main.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Update="ScottPlot\ScottPlot.WinForms\FormHelp.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Update="ScottPlot\ScottPlot.WinForms\FormsPlot.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Update="ScottPlot\ScottPlot.WinForms\FormsPlotLegendViewer.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Update="ScottPlot\ScottPlot.WinForms\FormsPlotViewer.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Update="ScottPlot\ScottPlot.WinForms\PlotObjectEditor.cs">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Update="siemens_IO.cs">
       <SubType>Form</SubType>
     </Compile>
