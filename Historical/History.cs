@@ -77,26 +77,6 @@ namespace Historical
 
         }
 
-        //处理：item拖放
-        private void ItemDroppedHandler(string address, string parent)
-        {
-            try
-            {
-                Vc_h vc1 = vcs[address];
-                Vc_h vc_p = vcs[parent];
-
-                MPoint mPoint = vc1.GetPoints();
-                if (mPoint.x.Count > 0)
-                {
-                    vc_p.AddPlot(address, mPoint);
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-            }
-        }
-
         //事件：关闭
         private void History_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -140,6 +120,25 @@ namespace Historical
             table1.Controls.Remove(vc.MFormsPlot);
         }
 
+        //处理：item拖放
+        private void ItemDroppedHandler(string address, string parent)
+        {
+            try
+            {
+                Vc_h vc1 = vcs[address];
+                Vc_h vc_p = vcs[parent];
+
+                MPoint mPoint = vc1.GetPoints();
+                if (mPoint.x.Count > 0)
+                {
+                    vc_p.AddPlot(address, mPoint);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
+        }
         private void btnQuery_Click(object sender, EventArgs e)
         {
             //按钮：查询
