@@ -133,6 +133,7 @@ namespace Historical
             //MFormsPlot.Plot.ShowLegend(Legends);
 
             MFormsPlot.Plot.Clear();
+            MFormsPlot.Plot.Axes.Clear();
             MFormsPlot.Refresh();
 
 

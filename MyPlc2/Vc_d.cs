@@ -105,7 +105,7 @@ namespace MyPlc2
         //画面队列
         private readonly Dictionary<string, DataStreamer> StreamerArray = new();
         private AxisLimits AxisLitmits;
-        private LeftAxis Axis_01;
+        private LeftAxis? Axis_01;
 
         //订阅
         private string _id;
@@ -148,7 +148,6 @@ namespace MyPlc2
             plot.Legend.IsVisible = true;
 
             //类型：DataStreamer
-            //var streamer = plot.Add.DataStreamer(50);
             var streamer = AddDataStreamer(1000);
             plot.Axes.AutoScale();
             streamer.ManageAxisLimits = false;
@@ -160,9 +159,6 @@ namespace MyPlc2
             if (Check01(MRecord.Address))
             {
                 streamer.ConnectStyle = ConnectStyle.StepHorizontal;
-                //plt.YAxis.SetBoundary(0, 50);
-                //plt.YAxis.SetInnerBoundary(0, 20);
-                //MFormsPlot.Configuration.Zoom = false;
                 Axis_01 = (LeftAxis)plot.Axes.Left;
                 Axis_01.Label.Text = "0-1";
                 plot.Axes.SetLimitsY(0, 50, Axis_01);
@@ -177,7 +173,7 @@ namespace MyPlc2
             }
 
             StreamerArray[MRecord.Address] = streamer;
-            //MFormsPlot.Refresh();
+
         }
 
         //拖放：加streamer 2
@@ -367,14 +363,28 @@ namespace MyPlc2
         //清空图形
         public override void ClearPlot(IPlotControl control)
         {
+            //clear legend
             Legends.Clear();
             MFormsPlot.Plot.ShowLegend(Legends);
 
+            //clear plot
             MFormsPlot.Plot.Clear();
-            MFormsPlot.Refresh();
-            
+            var yAxises = MFormsPlot.Plot.Axes.GetAxes(Edge.Left).ToList();
+            for (int i=1;i<yAxises.Count();i++)
+            {
+                MFormsPlot.Plot.Axes.Remove(yAxises[i]);
+            }
+            Axis_01 = null;
 
+            Axises.Clear();
             StreamerArray.Clear();
+
+            //display original plot
+            AddStreamer();            
+
+            MFormsPlot.Refresh();
+
+
         }
 
 

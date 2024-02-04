@@ -94,7 +94,9 @@ namespace Historical
                 d.Plot.Axes.DateTimeTicksBottom();
                 d.Anchor = AnchorStyles.Left;
                 d.Dock = DockStyle.Fill;
-                //d.Size = new(600, 400);
+                //最小高度
+                d.MinimumSize = new Size(0, 300);
+
                 table1.Controls.Add(d);
 
                 vc.delePlot += DeletePlotHandler;
@@ -103,7 +105,7 @@ namespace Historical
             catch (KeyNotFoundException ex)
             {
                 Debug.WriteLine("DblClicHandler：" + ex.Message);
-                Log.Information("DblClicHandler：" + ex.Message);
+                //Log.Information("DblClicHandler：" + ex.Message);
             }
             catch (InvalidOperationException ex)
             {

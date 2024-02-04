@@ -105,7 +105,7 @@ namespace MyPlc2
         public FormsPlot MFormsPlot { get; set; }
         public MPoint Points = new();
         //多轴
-        private Dictionary<int, MAxis> Axises = new();
+        public Dictionary<int, MAxis> Axises = new();
         public int Axis_lg_Count { get; set; } = 0; //值>100
         public int Axis_01_Count { get; set; } = 0; //值0-1
 
@@ -157,15 +157,24 @@ namespace MyPlc2
             menu.Clear();
 
             menu.Add("适应", FitPlot);
+            //menu.Add("重置", ResetPlot);
             menu.Add("清空图形", ClearPlot);
             menu.Add("删除图形", DeletePlot);
 
         }
 
+        //菜单：重置图形
+        private void ResetPlot(IPlotControl control)
+        {
+            MFormsPlot.Reset();
+            Refresh();
+        }
+
         //菜单：适应图形
         private void FitPlot(IPlotControl control)
         {
-            throw new NotImplementedException();
+            MFormsPlot.Plot.Axes.AutoScale(); 
+            Refresh();
         }
 
         //菜单：删除图形
@@ -189,7 +198,6 @@ namespace MyPlc2
 
         private void MFormsPlot_DragDrop(object? sender, DragEventArgs e)
         {
-
             MFormsPlot.DoDragDrop(this, DragDropEffects.None);
         }
 
@@ -377,6 +385,7 @@ namespace MyPlc2
         public void Refresh()
         {
             if (MFormsPlot is null) return;
+            if (MFormsPlot.Plot is null) return;
 
             if (MFormsPlot.InvokeRequired)
             {

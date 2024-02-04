@@ -94,6 +94,9 @@ namespace MyPlc2
                 //适配宽度
                 d.Anchor = AnchorStyles.Left;
                 d.Dock = DockStyle.Fill;
+                //最小高度
+                d.MinimumSize = new Size(0,300);
+
                 table1.Controls.Add(d);
 
                 vc.delePlot += DeletePlotHandler;
