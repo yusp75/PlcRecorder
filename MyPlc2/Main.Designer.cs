@@ -39,6 +39,7 @@
             acttion_stop = new ToolStripButton();
             btnIO = new ToolStripButton();
             action_history = new ToolStripButton();
+            action_exit = new ToolStripButton();
             split_0 = new SplitContainer();
             split1 = new SplitContainer();
             table1 = new TableLayoutPanel();
@@ -98,7 +99,7 @@
             // 
             // toolStrip1
             // 
-            toolStrip1.Items.AddRange(new ToolStripItem[] { action_start, acttion_stop, btnIO, action_history });
+            toolStrip1.Items.AddRange(new ToolStripItem[] { action_start, acttion_stop, btnIO, action_history, action_exit });
             toolStrip1.Location = new Point(0, 25);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new Size(800, 25);
@@ -144,8 +145,18 @@
             action_history.ImageTransparentColor = Color.Magenta;
             action_history.Name = "action_history";
             action_history.Size = new Size(23, 22);
-            action_history.Text = "toolStripButton1";
+            action_history.Text = "历史曲线";
             action_history.Click += action_history_Click;
+            // 
+            // action_exit
+            // 
+            action_exit.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            action_exit.Image = (Image)resources.GetObject("action_exit.Image");
+            action_exit.ImageTransparentColor = Color.Magenta;
+            action_exit.Name = "action_exit";
+            action_exit.Size = new Size(23, 22);
+            action_exit.Text = "退出";
+            action_exit.Click += action_exit_Click;
             // 
             // split_0
             // 
@@ -298,5 +309,6 @@
         private DataGridViewTextBoxColumn type;
         private DataGridViewTextBoxColumn time;
         private StatusStrip status1;
+        private ToolStripButton action_exit;
     }
 }

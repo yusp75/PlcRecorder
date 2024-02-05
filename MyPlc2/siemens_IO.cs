@@ -11,7 +11,7 @@ namespace MyPlc2
         private bool isConnected = false;
         private S7Client? Client;
         private bool inEdit = false;
-        private readonly string config_path = System.AppDomain.CurrentDomain.BaseDirectory + "\\config\\";
+        private readonly string config_path = AppDomain.CurrentDomain.BaseDirectory + "\\config\\";
 
         private string ip;
         private int slot;

@@ -3,6 +3,8 @@ using Serilog;
 using Sharp7;
 using System.Diagnostics;
 using ScottPlot.WinForms;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace MyPlc2
 {
@@ -32,6 +34,7 @@ namespace MyPlc2
 
         private MTreeView mTreeView = new();
 
+        private readonly string config_path = AppDomain.CurrentDomain.BaseDirectory + "\\config\\";
 
         //窗体
         private siemens400 io;
@@ -95,7 +98,7 @@ namespace MyPlc2
                 d.Anchor = AnchorStyles.Left;
                 d.Dock = DockStyle.Fill;
                 //最小高度
-                d.MinimumSize = new Size(0,300);
+                d.MinimumSize = new Size(0, 300);
 
                 table1.Controls.Add(d);
 
@@ -211,16 +214,33 @@ namespace MyPlc2
             //载入
             io = new();
             VcIntoQueue();
-            ChangeScreenSize();
+            //ChangeScreenSize();
+            //读窗口位置
+            try
+            {
+                using StreamReader reader = new(this.config_path + "\\window.json");
+                string s = reader.ReadToEnd();
+                if (s != null && s.Length > 0)
+                {
+                    JObject obj = JsonConvert.DeserializeObject<JObject>(s);
 
+                    Left = (int)obj["left"];
+                    Top = (int)obj["top"];
+                    Width = (int)obj["width"];
+                    Height = (int)obj["height"];
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.ToString());
+            }
         }
 
         //事件：关闭
         private void Main_FormClosing(object sender, FormClosingEventArgs e)
         {
             //e.Cancel = true;
-            //minimize
-            WindowState = FormWindowState.Minimized;
+            //MyClose();
         }
 
 
@@ -278,6 +298,58 @@ namespace MyPlc2
             int x = boundWidth - this.Width;
             int y = boundHeight - this.Height;
             this.Location = new Point(x / 2, y / 2);
+        }
+
+        //action：退出
+        private void action_exit_Click(object sender, EventArgs e)
+        {
+            //关闭窗体
+            Close();
+        }
+
+        private void MyClose()
+        {
+            var result = MessageBox.Show("确定退出？", "警告", MessageBoxButtons.OKCancel);
+            if (result == DialogResult.OK)
+            {
+                //保存窗口位置
+                try
+                {
+                    using StreamWriter writer = new(config_path + "window.json");
+                    string left = Left.ToString();
+                    string top = Top.ToString();
+                    string width = Width.ToString();
+                    string height = Height.ToString();
+
+                    var obj = new
+                    {
+                        left,
+                        top,
+                        width,
+                        height,
+                    };
+                    writer.WriteLine(JsonConvert.SerializeObject(obj));
+
+
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.ToString());
+                }
+
+                //停止线程
+
+                //关闭
+                //Close();
+                Dispose();
+                Application.Exit();
+
+            }
+            else
+            {
+                //最小化
+                WindowState = FormWindowState.Minimized;
+            }
         }
 
         //
