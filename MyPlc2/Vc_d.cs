@@ -254,14 +254,6 @@ namespace MyPlc2
                 this.Address = r.Address;
                 this.Value = value;
 
-                //需空检查
-                if (StreamerArray.ContainsKey(r.Address))
-                {
-                    DataStreamer streamer = StreamerArray[r.Address];
-                    //增加y值
-                    streamer?.Add(value);
-                }
-
                 //db
                 try
                 {
@@ -295,22 +287,26 @@ namespace MyPlc2
             // Subscribe to the event
             pub.ReadEvent += HandleReadEvent;
         }
+
+        //事件处理：读取
         public void HandleReadEvent(object sender, ReadEventArgs e)
         {
             string address = e.Address;
             double value = e.Value;
-
-            foreach (var streamer in StreamerArray)
+            MFormsPlot.Plot.RenderManager.PreRenderLock += (s, e) =>
             {
-                //只接收地址相同
-                if (address != null)
+                foreach (var streamer in StreamerArray)
                 {
-                    if (address.Equals(streamer.Key, StringComparison.OrdinalIgnoreCase))
+                    //只接收地址相同
+                    if (address != null)
                     {
-                        streamer.Value.Add(value);
+                        if (address.Equals(streamer.Key, StringComparison.OrdinalIgnoreCase))
+                        {
+                            streamer.Value.Add(value);
+                        }
                     }
                 }
-            }
+            };
             //更新
             //Refresh();
         }
@@ -341,7 +337,7 @@ namespace MyPlc2
 
         private void AddLegend(string name, ScottPlot.Color color)
         {
-            //去重
+            //避免重复legend
             if (Legends.Any(a => a.Label == name)) return;
 
             LegendItem item = new()
@@ -356,7 +352,7 @@ namespace MyPlc2
 
         }
 
-        //清空图形
+        //菜单处理：清空图形
         public override void ClearPlot(IPlotControl control)
         {
             //clear legend
