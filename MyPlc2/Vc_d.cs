@@ -1,15 +1,7 @@
 ﻿using Sharp7;
 using System.Diagnostics;
 using ScottPlot;
-using ScottPlot.Plottables;
 using ScottPlot.AxisPanels;
-using SkiaSharp;
-using System.Drawing;
-using InfluxDB.Client.Api.Domain;
-using System.IO;
-using static Python.Runtime.TypeSpec;
-using ScottPlot.Legends;
-using ScottPlot.WinForms;
 
 namespace MyPlc2
 {
@@ -349,6 +341,9 @@ namespace MyPlc2
 
         private void AddLegend(string name, ScottPlot.Color color)
         {
+            //去重
+            if (Legends.Any(a => a.Label == name)) return;
+
             LegendItem item = new()
             {
                 LineColor = color,
@@ -358,6 +353,7 @@ namespace MyPlc2
             };
             Legends.Add(item);
             MFormsPlot.Plot.ShowLegend(Legends, location: Alignment.UpperLeft);
+
         }
 
         //清空图形
@@ -370,7 +366,7 @@ namespace MyPlc2
             //clear plot
             MFormsPlot.Plot.Clear();
             var yAxises = MFormsPlot.Plot.Axes.GetAxes(Edge.Left).ToList();
-            for (int i=1;i<yAxises.Count();i++)
+            for (int i = 1; i < yAxises.Count(); i++)
             {
                 MFormsPlot.Plot.Axes.Remove(yAxises[i]);
             }
@@ -380,7 +376,7 @@ namespace MyPlc2
             StreamerArray.Clear();
 
             //display original plot
-            AddStreamer();            
+            AddStreamer();
 
             MFormsPlot.Refresh();
 

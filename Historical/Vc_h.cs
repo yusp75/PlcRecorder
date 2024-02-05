@@ -129,15 +129,25 @@ namespace Historical
         //菜单：图形清除
         public override void ClearPlot(IPlotControl control)
         {
-            //Legends.Clear();
-            //MFormsPlot.Plot.ShowLegend(Legends);
+            //clear legend
+            var a= MFormsPlot.Plot.Legend;
 
+            //clear plot
             MFormsPlot.Plot.Clear();
-            MFormsPlot.Plot.Axes.Clear();
+            var yAxises = MFormsPlot.Plot.Axes.GetAxes(Edge.Left).ToList();
+            for (int i = 1; i < yAxises.Count(); i++)
+            {
+                MFormsPlot.Plot.Axes.Remove(yAxises[i]);
+            }
+            
+            Axises.Clear();
+            PlotArray.Clear();
+
+            //display original plot
+            AddPlot();
+
             MFormsPlot.Refresh();
 
-
-            PlotArray.Clear();
         }
         //
     }
