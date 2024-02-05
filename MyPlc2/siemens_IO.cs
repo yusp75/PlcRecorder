@@ -235,7 +235,7 @@ namespace MyPlc2
                 MessageBox.Show(ex.ToString());
             }
             //按钮按下，发送true
-            this.sendMsg(true);
+            sendMsg(true);
 
             //button
         }

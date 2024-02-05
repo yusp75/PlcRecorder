@@ -44,6 +44,7 @@ namespace MyPlc2
             InitializeComponent();
             this.FormClosing += new FormClosingEventHandler(Main_FormClosing);
 
+            //菜单
             mTreeView.CheckBoxes = false;
             mTreeView.Dock = DockStyle.Fill;
             this.split1.Panel1.Controls.Add(mTreeView);
@@ -176,6 +177,7 @@ namespace MyPlc2
             ThreadPool.QueueUserWorkItem(worker_50.Run, worker_50);
             ThreadPool.QueueUserWorkItem(worker_100.Run, worker_100);
             ThreadPool.QueueUserWorkItem(worker_1s.Run, worker_1s);
+            
             //线程：PLC连接
             ThreadPool.QueueUserWorkItem(CheckPlcConnect);
 
@@ -201,7 +203,7 @@ namespace MyPlc2
             this.updateVar = isApplied;
             Debug.WriteLine("变量修改了");
             //读变量到tree菜单
-            //mTreeView.ReadVars();
+            mTreeView.ReadVars();
 
             //更新记录变量
             //停止所有线程
