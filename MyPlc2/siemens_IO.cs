@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Windows.Forms;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Sharp7;
@@ -266,8 +267,30 @@ namespace MyPlc2
 
             } //存在变量文件
         }
+
+        //事件：鼠标按下
+        private void view1_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                var hti = view1.HitTest(e.X, e.Y);
+                if (hti.RowIndex >= 0)
+                {
+                    view1.ClearSelection();
+                    view1.Rows[hti.RowIndex].Selected = true;
+                }
+            }
+        }
+
+        //上下文菜单：删除
+        private void 删除行ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (DataGridViewRow row in view1.SelectedRows)
+            {
+                view1.Rows.RemoveAt(row.Index);
+            }
+        }
+
+        //
     }
-
-
-    //
 }

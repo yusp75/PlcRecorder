@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             groupBox1 = new GroupBox();
             btnSave = new Button();
             lblPlcConnectd = new Label();
@@ -47,9 +48,12 @@
             btnVarCancel = new Button();
             btnVarApply = new Button();
             btnEdit = new Button();
+            menu1 = new ContextMenuStrip(components);
+            删除行ToolStripMenuItem = new ToolStripMenuItem();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)txtSlot).BeginInit();
             ((System.ComponentModel.ISupportInitialize)view1).BeginInit();
+            menu1.SuspendLayout();
             SuspendLayout();
             // 
             // groupBox1
@@ -138,6 +142,7 @@
             view1.BackgroundColor = SystemColors.ButtonFace;
             view1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             view1.Columns.AddRange(new DataGridViewColumn[] { name, address, type, cycle, comment, active });
+            view1.ContextMenuStrip = menu1;
             view1.EditMode = DataGridViewEditMode.EditOnEnter;
             view1.Enabled = false;
             view1.GridColor = SystemColors.ActiveCaption;
@@ -147,6 +152,7 @@
             view1.RowTemplate.Height = 25;
             view1.Size = new Size(776, 340);
             view1.TabIndex = 1;
+            view1.MouseDown += view1_MouseDown;
             // 
             // name
             // 
@@ -222,6 +228,19 @@
             btnEdit.UseVisualStyleBackColor = true;
             btnEdit.Click += BtnEdit_Click;
             // 
+            // menu1
+            // 
+            menu1.Items.AddRange(new ToolStripItem[] { 删除行ToolStripMenuItem });
+            menu1.Name = "menu1";
+            menu1.Size = new Size(181, 48);
+            // 
+            // 删除行ToolStripMenuItem
+            // 
+            删除行ToolStripMenuItem.Name = "删除行ToolStripMenuItem";
+            删除行ToolStripMenuItem.Size = new Size(180, 22);
+            删除行ToolStripMenuItem.Text = "删除行";
+            删除行ToolStripMenuItem.Click += 删除行ToolStripMenuItem_Click;
+            // 
             // Siemens400
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
@@ -240,6 +259,7 @@
             groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)txtSlot).EndInit();
             ((System.ComponentModel.ISupportInitialize)view1).EndInit();
+            menu1.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -266,5 +286,7 @@
         private DataGridViewComboBoxColumn cycle;
         private DataGridViewTextBoxColumn comment;
         private DataGridViewCheckBoxColumn active;
+        private ContextMenuStrip menu1;
+        private ToolStripMenuItem 删除行ToolStripMenuItem;
     }
 }
