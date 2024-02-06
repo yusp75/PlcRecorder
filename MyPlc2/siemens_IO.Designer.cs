@@ -76,7 +76,7 @@
             btnSave.TabIndex = 7;
             btnSave.Text = "保存";
             btnSave.UseVisualStyleBackColor = true;
-            btnSave.Click += btnSave_Click;
+            btnSave.Click += BtnSave_Click;
             // 
             // lblPlcConnectd
             // 
@@ -199,7 +199,7 @@
             btnVarCancel.TabIndex = 8;
             btnVarCancel.Text = "取消";
             btnVarCancel.UseVisualStyleBackColor = true;
-            btnVarCancel.Click += btnVarCancel_Click;
+            btnVarCancel.Click += BtnVarCancel_Click;
             // 
             // btnVarApply
             // 
@@ -209,7 +209,7 @@
             btnVarApply.TabIndex = 9;
             btnVarApply.Text = "应用";
             btnVarApply.UseVisualStyleBackColor = true;
-            btnVarApply.Click += btnVarApply_Click;
+            btnVarApply.Click += BtnVarApply_Click;
             // 
             // btnEdit
             // 
@@ -219,7 +219,7 @@
             btnEdit.TabIndex = 10;
             btnEdit.Text = "编辑";
             btnEdit.UseVisualStyleBackColor = true;
-            btnEdit.Click += btnEdit_Click;
+            btnEdit.Click += BtnEdit_Click;
             // 
             // siemens400
             // 

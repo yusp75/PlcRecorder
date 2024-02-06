@@ -40,18 +40,30 @@ namespace MyPlc2
 
             CheckBoxes = true;
 
-            ReadVars();
+            ReadVars(null);
 
             //拖放
             this.ItemDrag += MTreeView_ItemDrag;
         }
 
         //读plc变量
-        public void ReadVars()
+        public void ReadVars(string? strVars)
         {
-            string file = path + "config\\vars.json";
-            using StreamReader sr = new StreamReader(file);
-            string s = sr.ReadToEnd();
+            string s;
+            //从文件读
+            if (strVars == null)
+            {
+                string file = path + "config\\vars.json";
+                using (StreamReader sr = new StreamReader(file))
+                {
+                    s = sr.ReadToEnd();
+                }
+            }
+            else
+            {
+                s = strVars;
+            }
+
             try
             {
                 BeginUpdate();

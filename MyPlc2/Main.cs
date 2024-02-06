@@ -139,7 +139,7 @@ namespace MyPlc2
         }
 
         //action：启动
-        private void action_start_Click(object sender, EventArgs e)
+        private void ActionStartClick(object sender, EventArgs e)
         {
             ChangeBgColor(true, false);
 
@@ -177,18 +177,18 @@ namespace MyPlc2
             ThreadPool.QueueUserWorkItem(worker_50.Run, worker_50);
             ThreadPool.QueueUserWorkItem(worker_100.Run, worker_100);
             ThreadPool.QueueUserWorkItem(worker_1s.Run, worker_1s);
-            
+
             //线程：PLC连接
             ThreadPool.QueueUserWorkItem(CheckPlcConnect);
 
         }
 
-        private void Act_1(object sender, EventArgs e)
+        private void ActionIoClick(object sender, EventArgs e)
         {
             //
         }
 
-        private void btnIO_Click(object sender, EventArgs e)
+        private void BtnIO_Click(object sender, EventArgs e)
         {
             // 打开PLC　IO管理页
             siemens400 siemens = new siemens400();
@@ -198,12 +198,12 @@ namespace MyPlc2
         }
 
         //消息：plc变量改变
-        private void ReceiveMsg(bool isApplied)
+        private void ReceiveMsg(bool isApplied, string s)
         {
             this.updateVar = isApplied;
             Debug.WriteLine("变量修改了");
             //读变量到tree菜单
-            mTreeView.ReadVars();
+            mTreeView.ReadVars(s);
 
             //更新记录变量
             //停止所有线程
@@ -317,23 +317,24 @@ namespace MyPlc2
                 //保存窗口位置
                 try
                 {
-                    using StreamWriter writer = new(config_path + "window.json");
-                    string left = Left.ToString();
-                    string top = Top.ToString();
-                    string width = Width.ToString();
-                    string height = Height.ToString();
-
-                    var obj = new
+                    using (StreamWriter writer = new(config_path + "window.json"))
                     {
-                        left,
-                        top,
-                        width,
-                        height,
-                    };
-                    writer.WriteLine(JsonConvert.SerializeObject(obj));
+                        string left = Left.ToString();
+                        string top = Top.ToString();
+                        string width = Width.ToString();
+                        string height = Height.ToString();
 
-
+                        var obj = new
+                        {
+                            left,
+                            top,
+                            width,
+                            height,
+                        };
+                        writer.WriteLine(JsonConvert.SerializeObject(obj));
+                    }
                 }
+
                 catch (Exception ex)
                 {
                     Debug.WriteLine(ex.ToString());
@@ -345,7 +346,6 @@ namespace MyPlc2
                 //Close();
                 Dispose();
                 Application.Exit();
-
             }
             else
             {

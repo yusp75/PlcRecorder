@@ -16,7 +16,7 @@ namespace MyPlc2
         private string ip;
         private int slot;
 
-        public delegate void SendMsg(bool isApplied);
+        public delegate void SendMsg(bool isApplied, string s);
         public SendMsg sendMsg;
 
         private MyLog log = new(null);
@@ -33,19 +33,17 @@ namespace MyPlc2
             //读取PLC连接
             if (File.Exists(this.config_path + "plc.json"))
             {
-                using StreamReader reader = new(this.config_path + "\\plc.json");
-                string s = reader.ReadLine();
-
-                //PlcConnect connect = new();
-                //var obj = JsonConvert.DeserializeObject(s);
-                var obj = JObject.Parse(s);
-                if (obj != null)
+                using (StreamReader reader = new(this.config_path + "\\plc.json"))
                 {
-                    this.ip = obj.GetValue("ip").ToString();
-                    this.slot = (int)obj.GetValue("slot");
+                    string s = reader.ReadLine();
+                    var obj = JObject.Parse(s);
+                    if (obj != null)
+                    {
+                        this.ip = obj.GetValue("ip").ToString();
+                        this.slot = (int)obj.GetValue("slot");
+                    }
                 }
-
-            }
+            } //if
         }
 
         private void btnConnect_Click(object sender, EventArgs e)
@@ -121,6 +119,7 @@ namespace MyPlc2
             {
                 using StreamReader reader = new(this.config_path + "\\vars.json");
                 string s = reader.ReadToEnd();
+                reader.Close();
                 if (!string.IsNullOrEmpty(s))
                 {
                     List<PlcVar> vars = JsonConvert.DeserializeObject<List<PlcVar>>(s);
@@ -160,13 +159,13 @@ namespace MyPlc2
         }
 
 
-        private void btnVarCancel_Click(object sender, EventArgs e)
+        private void BtnVarCancel_Click(object sender, EventArgs e)
         {
             //关闭变量IO
             this.Close();
         }
 
-        private void btnEdit_Click(object sender, EventArgs e)
+        private void BtnEdit_Click(object sender, EventArgs e)
         {
             //编辑变量列表模式
             if (this.inEdit)
@@ -184,7 +183,7 @@ namespace MyPlc2
             }
         }
 
-        private void btnVarApply_Click(object sender, EventArgs e)
+        private void BtnVarApply_Click(object sender, EventArgs e)
         {
             //按钮：应用
             //检查数值合理
@@ -227,20 +226,21 @@ namespace MyPlc2
             try
             {
                 using StreamWriter writer = new(config_path + "vars.json");
-                String s = JsonConvert.SerializeObject(list);
+                string s = JsonConvert.SerializeObject(list);
                 writer.Write(s);
+                writer.Close();
+
+                //更新菜单
+                sendMsg(true, s);
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString());
             }
-            //按钮按下，发送true
-            sendMsg(true);
 
-            //button
         }
 
-        private void btnSave_Click(object sender, EventArgs e)
+        private void BtnSave_Click(object sender, EventArgs e)
         {
             //保存plc参数
             try
@@ -251,12 +251,11 @@ namespace MyPlc2
 
                 var obj = new
                 {
-                    ip = ip,
-                    slot = slot
+                    ip,
+                    slot
                 };
                 writer.WriteLine(JsonConvert.SerializeObject(obj));
-
-
+                writer.Close();
             }
             catch (Exception ex)
             {

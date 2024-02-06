@@ -82,7 +82,7 @@
             menu_io.Name = "menu_io";
             menu_io.Size = new Size(114, 22);
             menu_io.Text = "IO变量";
-            menu_io.Click += Act_1;
+            menu_io.Click += ActionIoClick;
             // 
             // menu_curve
             // 
@@ -115,7 +115,7 @@
             action_start.Name = "action_start";
             action_start.Size = new Size(23, 22);
             action_start.Text = "开始";
-            action_start.Click += action_start_Click;
+            action_start.Click += ActionStartClick;
             // 
             // acttion_stop
             // 
@@ -136,7 +136,7 @@
             btnIO.Name = "btnIO";
             btnIO.Size = new Size(23, 22);
             btnIO.Text = "变量设置";
-            btnIO.Click += btnIO_Click;
+            btnIO.Click += BtnIO_Click;
             // 
             // action_history
             // 
