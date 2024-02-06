@@ -156,7 +156,7 @@
             action_exit.Name = "action_exit";
             action_exit.Size = new Size(23, 22);
             action_exit.Text = "退出";
-            action_exit.Click += action_exit_Click;
+            action_exit.Click += ActionExitClick;
             // 
             // split_0
             // 

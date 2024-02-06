@@ -303,7 +303,7 @@ namespace MyPlc2
         }
 
         //action£ºÍË³ö
-        private void action_exit_Click(object sender, EventArgs e)
+        private void ActionExitClick(object sender, EventArgs e)
         {
             //¹Ø±Õ´°Ìå
             Close();

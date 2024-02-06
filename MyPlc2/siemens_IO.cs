@@ -117,9 +117,11 @@ namespace MyPlc2
             //读取变量到数据表格
             if (File.Exists(this.config_path + "vars.json"))
             {
-                using StreamReader reader = new(this.config_path + "\\vars.json");
-                string s = reader.ReadToEnd();
-                reader.Close();
+                string s;
+                using (StreamReader reader = new(this.config_path + "\\vars.json"))
+                {
+                    s = reader.ReadToEnd();
+                }
                 if (!string.IsNullOrEmpty(s))
                 {
                     List<PlcVar> vars = JsonConvert.DeserializeObject<List<PlcVar>>(s);
@@ -155,7 +157,7 @@ namespace MyPlc2
 
         public S7Client GetClient()
         {
-            return this.Client;
+            return Client;
         }
 
 
@@ -185,7 +187,7 @@ namespace MyPlc2
 
         private void BtnVarApply_Click(object sender, EventArgs e)
         {
-            //按钮：应用
+            //按钮：应用/保存
             //检查数值合理
             //保存变量到json
             List<PlcVar> list = new();
@@ -225,10 +227,11 @@ namespace MyPlc2
 
             try
             {
-                using StreamWriter writer = new(config_path + "vars.json");
                 string s = JsonConvert.SerializeObject(list);
-                writer.Write(s);
-                writer.Close();
+                using (StreamWriter writer = new(config_path + "vars.json"))
+                {
+                    writer.Write(s);
+                }
 
                 //更新菜单
                 sendMsg(true, s);
@@ -245,17 +248,18 @@ namespace MyPlc2
             //保存plc参数
             try
             {
-                using StreamWriter writer = new(config_path + "plc.json");
-                string ip = txtIP.Text.Replace(" ", "");
-                int slot = Convert.ToInt16(txtSlot.Text.Trim());
-
-                var obj = new
+                using (StreamWriter writer = new(config_path + "plc.json"))
                 {
-                    ip,
-                    slot
-                };
-                writer.WriteLine(JsonConvert.SerializeObject(obj));
-                writer.Close();
+                    string ip = txtIP.Text.Replace(" ", "");
+                    int slot = Convert.ToInt16(txtSlot.Text.Trim());
+
+                    var obj = new
+                    {
+                        ip,
+                        slot
+                    };
+                    writer.WriteLine(JsonConvert.SerializeObject(obj));
+                }
             }
             catch (Exception ex)
             {

@@ -207,7 +207,7 @@
             btnVarApply.Name = "btnVarApply";
             btnVarApply.Size = new Size(75, 23);
             btnVarApply.TabIndex = 9;
-            btnVarApply.Text = "应用";
+            btnVarApply.Text = "保存";
             btnVarApply.UseVisualStyleBackColor = true;
             btnVarApply.Click += BtnVarApply_Click;
             // 
