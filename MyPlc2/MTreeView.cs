@@ -22,7 +22,7 @@ namespace MyPlc2
     public partial class MTreeView : TreeView
     {
         private readonly string path = System.AppDomain.CurrentDomain.BaseDirectory;
-        private Dictionary<string, MTreeNode> data = new();
+        private Dictionary<string, MTreeNode> Data = new();
         private List<string> Addresses = new();
         //已激活地址
         public List<string> AddressesList { get; set; } = new();
@@ -67,6 +67,8 @@ namespace MyPlc2
             try
             {
                 BeginUpdate();
+
+                Data.Clear();
                 Nodes.Clear();
 
                 List<PlcVar> vars = JsonConvert.DeserializeObject<List<PlcVar>>(s);
@@ -76,14 +78,14 @@ namespace MyPlc2
                     {
                         try
                         {
-                            data.Add(var.name, new MTreeNode(var.name, var.address, false));
+                            Data.Add(var.name, new MTreeNode(var.name, var.address, false));
                             Nodes.Add(new TreeNode(var.name));
 
                             AddressesList.Add(var.address);
                         }
-                        catch (Exception ex)
+                        catch (Exception e)
                         {
-
+                            Debug.WriteLine("MTreeView 添加节点：" + e.ToString());
                         }
                     }
                 }
@@ -92,7 +94,7 @@ namespace MyPlc2
             }
             catch (NullReferenceException e)
             {
-                Debug.WriteLine(e.ToString());
+                Debug.WriteLine("MTreeView：" + e.ToString());
             }
         }
         //项目拖曳
@@ -101,14 +103,14 @@ namespace MyPlc2
             string name = ((TreeNode)e.Item).Text;
             if (e.Button == MouseButtons.Left)
             {
-                DoDragDrop(data[name].Address, DragDropEffects.Copy);
+                DoDragDrop(Data[name].Address, DragDropEffects.Copy);
                 //Debug.WriteLine("拖曳：" + data[name].Address);
             }
         }
 
         protected override void OnNodeMouseDoubleClick(TreeNodeMouseClickEventArgs e)
         {
-            dblClickDelegate(e.Node.Text, data[e.Node.Text].Address);
+            dblClickDelegate(e.Node.Text, Data[e.Node.Text].Address);
         }
         //事件：勾选
         protected override void OnAfterCheck(TreeViewEventArgs e)
@@ -116,9 +118,9 @@ namespace MyPlc2
             base.OnAfterCheck(e);
             if (e.Node != null)
             {
-                string address = data[e.Node.Text].Address;
+                string address = Data[e.Node.Text].Address;
                 bool check = e.Node.Checked;
-                data[e.Node.Text].Checked = check;
+                Data[e.Node.Text].Checked = check;
 
                 //在Addresses中添加、删除
                 if (!check)

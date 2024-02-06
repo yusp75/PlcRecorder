@@ -201,7 +201,7 @@ namespace MyPlc2
         private void ReceiveMsg(bool isApplied, string s)
         {
             this.updateVar = isApplied;
-            Debug.WriteLine("变量修改了");
+            Debug.WriteLine("变量：" + s);
             //读变量到tree菜单
             mTreeView.ReadVars(s);
 
@@ -256,13 +256,13 @@ namespace MyPlc2
         }
 
         //action:停止
-        private void action_stop_Click(object sender, EventArgs e)
+        private void ActionStopClick(object sender, EventArgs e)
         {
             ChangeBgColor(false, true);
         }
 
         //历史数据分析
-        private void action_history_Click(object sender, EventArgs e)
+        private void ActionHistoryClick(object sender, EventArgs e)
         {
             //调用外部程序：历史曲线
 

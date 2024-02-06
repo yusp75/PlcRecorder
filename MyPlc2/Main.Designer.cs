@@ -126,7 +126,7 @@
             acttion_stop.Name = "acttion_stop";
             acttion_stop.Size = new Size(23, 22);
             acttion_stop.Text = "停止";
-            acttion_stop.Click += action_stop_Click;
+            acttion_stop.Click += ActionStopClick;
             // 
             // btnIO
             // 
@@ -146,7 +146,7 @@
             action_history.Name = "action_history";
             action_history.Size = new Size(23, 22);
             action_history.Text = "历史曲线";
-            action_history.Click += action_history_Click;
+            action_history.Click += ActionHistoryClick;
             // 
             // action_exit
             // 
