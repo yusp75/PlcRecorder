@@ -49,6 +49,7 @@
             message = new DataGridViewTextBoxColumn();
             type = new DataGridViewTextBoxColumn();
             time = new DataGridViewTextBoxColumn();
+            InfluxDbToken = new ToolStripButton();
             menuStrip1.SuspendLayout();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)split_0).BeginInit();
@@ -99,7 +100,7 @@
             // 
             // toolStrip1
             // 
-            toolStrip1.Items.AddRange(new ToolStripItem[] { action_start, acttion_stop, btnIO, action_history, action_exit });
+            toolStrip1.Items.AddRange(new ToolStripItem[] { action_start, acttion_stop, btnIO, action_history, InfluxDbToken, action_exit });
             toolStrip1.Location = new Point(0, 25);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new Size(800, 25);
@@ -259,6 +260,16 @@
             time.Name = "time";
             time.ReadOnly = true;
             // 
+            // InfluxDbToken
+            // 
+            InfluxDbToken.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            InfluxDbToken.Image = (Image)resources.GetObject("InfluxDbToken.Image");
+            InfluxDbToken.ImageTransparentColor = Color.Magenta;
+            InfluxDbToken.Name = "InfluxDbToken";
+            InfluxDbToken.Size = new Size(23, 22);
+            InfluxDbToken.Text = "Token";
+            InfluxDbToken.Click += InfluxDbToken_Click;
+            // 
             // Main
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
@@ -310,5 +321,6 @@
         private DataGridViewTextBoxColumn time;
         private StatusStrip status1;
         private ToolStripButton action_exit;
+        private ToolStripButton InfluxDbToken;
     }
 }

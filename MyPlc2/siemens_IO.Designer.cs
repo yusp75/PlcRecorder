@@ -44,12 +44,12 @@
             cycle = new DataGridViewComboBoxColumn();
             comment = new DataGridViewTextBoxColumn();
             active = new DataGridViewCheckBoxColumn();
+            menu1 = new ContextMenuStrip(components);
+            删除行ToolStripMenuItem = new ToolStripMenuItem();
             label3 = new Label();
             btnVarCancel = new Button();
             btnVarApply = new Button();
             btnEdit = new Button();
-            menu1 = new ContextMenuStrip(components);
-            删除行ToolStripMenuItem = new ToolStripMenuItem();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)txtSlot).BeginInit();
             ((System.ComponentModel.ISupportInitialize)view1).BeginInit();
@@ -189,6 +189,19 @@
             active.HeaderText = "激活";
             active.Name = "active";
             // 
+            // menu1
+            // 
+            menu1.Items.AddRange(new ToolStripItem[] { 删除行ToolStripMenuItem });
+            menu1.Name = "menu1";
+            menu1.Size = new Size(181, 48);
+            // 
+            // 删除行ToolStripMenuItem
+            // 
+            删除行ToolStripMenuItem.Name = "删除行ToolStripMenuItem";
+            删除行ToolStripMenuItem.Size = new Size(180, 22);
+            删除行ToolStripMenuItem.Text = "删除行";
+            删除行ToolStripMenuItem.Click += DeleteItem_Click;
+            // 
             // label3
             // 
             label3.AutoSize = true;
@@ -227,19 +240,6 @@
             btnEdit.Text = "编辑";
             btnEdit.UseVisualStyleBackColor = true;
             btnEdit.Click += BtnEdit_Click;
-            // 
-            // menu1
-            // 
-            menu1.Items.AddRange(new ToolStripItem[] { 删除行ToolStripMenuItem });
-            menu1.Name = "menu1";
-            menu1.Size = new Size(181, 48);
-            // 
-            // 删除行ToolStripMenuItem
-            // 
-            删除行ToolStripMenuItem.Name = "删除行ToolStripMenuItem";
-            删除行ToolStripMenuItem.Size = new Size(180, 22);
-            删除行ToolStripMenuItem.Text = "删除行";
-            删除行ToolStripMenuItem.Click += 删除行ToolStripMenuItem_Click;
             // 
             // Siemens400
             // 

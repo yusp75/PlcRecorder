@@ -354,6 +354,13 @@ namespace MyPlc2
             }
         }
 
+        //´°¿Ú£ºÁîÅÆ
+        private void InfluxDbToken_Click(object sender, EventArgs e)
+        {
+            Token token = new();
+            token.Show();
+        }
+
         //
     }
 }

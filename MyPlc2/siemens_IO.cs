@@ -283,7 +283,7 @@ namespace MyPlc2
         }
 
         //上下文菜单：删除
-        private void 删除行ToolStripMenuItem_Click(object sender, EventArgs e)
+        private void DeleteItem_Click(object sender, EventArgs e)
         {
             foreach (DataGridViewRow row in view1.SelectedRows)
             {
