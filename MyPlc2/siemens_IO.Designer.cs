@@ -1,6 +1,6 @@
 ﻿namespace MyPlc2
 {
-    partial class siemens400
+    partial class Siemens400
     {
         /// <summary>
         /// Required designer variable.
@@ -76,7 +76,7 @@
             btnSave.TabIndex = 7;
             btnSave.Text = "保存";
             btnSave.UseVisualStyleBackColor = true;
-            btnSave.Click += BtnSave_Click;
+            btnSave.Click += BtnSavePlcClick;
             // 
             // lblPlcConnectd
             // 
@@ -104,7 +104,7 @@
             btnConnect.TabIndex = 4;
             btnConnect.Text = "连接";
             btnConnect.UseVisualStyleBackColor = true;
-            btnConnect.Click += btnConnect_Click;
+            btnConnect.Click += BtnConnect_Click;
             // 
             // txtIP
             // 
@@ -142,6 +142,7 @@
             view1.Enabled = false;
             view1.GridColor = SystemColors.ActiveCaption;
             view1.Location = new Point(12, 105);
+            view1.MultiSelect = false;
             view1.Name = "view1";
             view1.RowTemplate.Height = 25;
             view1.Size = new Size(776, 340);
@@ -221,7 +222,7 @@
             btnEdit.UseVisualStyleBackColor = true;
             btnEdit.Click += BtnEdit_Click;
             // 
-            // siemens400
+            // Siemens400
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -232,9 +233,9 @@
             Controls.Add(label3);
             Controls.Add(view1);
             Controls.Add(groupBox1);
-            Name = "siemens400";
+            Name = "Siemens400";
             Text = "PLC记录机-IO变量";
-            Activated += siemens400_Activated;
+            Load += Siemens400_Load;
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)txtSlot).EndInit();

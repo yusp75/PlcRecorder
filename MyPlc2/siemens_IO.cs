@@ -6,7 +6,7 @@ using Sharp7;
 
 namespace MyPlc2
 {
-    public partial class siemens400 : Form
+    public partial class Siemens400 : Form
     {
         private bool isConnected = false;
         private S7Client? Client;
@@ -21,7 +21,7 @@ namespace MyPlc2
 
         private MyLog log = new(null);
 
-        public siemens400()
+        public Siemens400()
         {
             InitializeComponent();
 
@@ -46,7 +46,7 @@ namespace MyPlc2
             } //if
         }
 
-        private void btnConnect_Click(object sender, EventArgs e)
+        private void BtnConnect_Click(object sender, EventArgs e)
         {
             //连接
             this.Connect();
@@ -107,42 +107,6 @@ namespace MyPlc2
             }
         }
 
-        private void siemens400_Activated(object sender, EventArgs e)
-        {
-            //窗体激活           
-
-            txtIP.Text = this.ip;
-            txtSlot.Text = this.slot.ToString();
-
-            //读取变量到数据表格
-            if (File.Exists(this.config_path + "vars.json"))
-            {
-                string s;
-                using (StreamReader reader = new(this.config_path + "\\vars.json"))
-                {
-                    s = reader.ReadToEnd();
-                }
-                if (!string.IsNullOrEmpty(s))
-                {
-                    List<PlcVar> vars = JsonConvert.DeserializeObject<List<PlcVar>>(s);
-                    if (vars is not null && vars.Count > 0)
-                    {
-                        for (int i = 0; i < vars.Count; i++)
-                        {
-                            this.view1.Rows.Add();
-                            this.view1.Rows[i].Cells["name"].Value = vars[i].name;
-                            this.view1.Rows[i].Cells["address"].Value = vars[i].address;
-                            this.view1.Rows[i].Cells["type"].Value = vars[i].type;
-                            this.view1.Rows[i].Cells["cycle"].Value = vars[i].cycle;
-                            this.view1.Rows[i].Cells["comment"].Value = vars[i].comment;
-                            this.view1.Rows[i].Cells["active"].Value = vars[i].active;
-                        }
-                    }
-                }
-
-            } //存在变量文件
-        }
-
         private void UpdateLblStatus(String msg, Color color)
         {
             //更新PLC连接状态
@@ -188,7 +152,7 @@ namespace MyPlc2
         private void BtnVarApply_Click(object sender, EventArgs e)
         {
             //按钮：应用/保存
-            //检查数值合理
+            //检查数值合法
             //保存变量到json
             List<PlcVar> list = new();
             foreach (DataGridViewRow row in this.view1.Rows)
@@ -232,7 +196,7 @@ namespace MyPlc2
                 {
                     writer.Write(s);
                 }
-
+                MessageBox.Show("变量保存成功");
                 //更新菜单
                 sendMsg(true, s);
             }
@@ -243,7 +207,7 @@ namespace MyPlc2
 
         }
 
-        private void BtnSave_Click(object sender, EventArgs e)
+        private void BtnSavePlcClick(object sender, EventArgs e)
         {
             //保存plc参数
             try
@@ -266,6 +230,41 @@ namespace MyPlc2
                 Debug.WriteLine(ex.ToString());
             }
 
+        }
+
+        //窗体装载
+        private void Siemens400_Load(object sender, EventArgs e)
+        {
+            txtIP.Text = this.ip;
+            txtSlot.Text = this.slot.ToString();
+
+            //读取变量到数据表格
+            if (File.Exists(this.config_path + "vars.json"))
+            {
+                string s;
+                using (StreamReader reader = new(this.config_path + "\\vars.json"))
+                {
+                    s = reader.ReadToEnd();
+                }
+                if (!string.IsNullOrEmpty(s))
+                {
+                    List<PlcVar> vars = JsonConvert.DeserializeObject<List<PlcVar>>(s);
+                    if (vars is not null && vars.Count > 0)
+                    {
+                        for (int i = 0; i < vars.Count; i++)
+                        {
+                            this.view1.Rows.Add();
+                            this.view1.Rows[i].Cells["name"].Value = vars[i].name;
+                            this.view1.Rows[i].Cells["address"].Value = vars[i].address;
+                            this.view1.Rows[i].Cells["type"].Value = vars[i].type;
+                            this.view1.Rows[i].Cells["cycle"].Value = vars[i].cycle;
+                            this.view1.Rows[i].Cells["comment"].Value = vars[i].comment;
+                            this.view1.Rows[i].Cells["active"].Value = vars[i].active;
+                        }
+                    }
+                }
+
+            } //存在变量文件
         }
     }
 

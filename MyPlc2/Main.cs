@@ -37,7 +37,7 @@ namespace MyPlc2
         private readonly string config_path = AppDomain.CurrentDomain.BaseDirectory + "\\config\\";
 
         //窗体
-        private siemens400 io;
+        private Siemens400 io;
 
         public Main()
         {
@@ -191,8 +191,8 @@ namespace MyPlc2
         private void BtnIO_Click(object sender, EventArgs e)
         {
             // 打开PLC　IO管理页
-            siemens400 siemens = new siemens400();
-            siemens.sendMsg += new siemens400.SendMsg(ReceiveMsg);
+            Siemens400 siemens = new Siemens400();
+            siemens.sendMsg += new Siemens400.SendMsg(ReceiveMsg);
             siemens.Show();
 
         }
