@@ -31,12 +31,14 @@ namespace MyPlc2
         private Dictionary<string, Vc_d> vcs = new();
 
         private int CountOfClientLost = 0;
+        private bool ConnectState = false;
 
         private MTreeView mTreeView = new();
 
         private readonly string config_path = AppDomain.CurrentDomain.BaseDirectory + "\\config\\";
 
         public event EventHandler<UpdatePlcClientEventArgs>? UpdatePlcClientEvent;
+        private delegate void UpdateStripLabel(ref ToolStripLabel label, System.Drawing.Color color);
 
         //窗体
         private Siemens400 Io;
@@ -69,7 +71,6 @@ namespace MyPlc2
                 Vc_d vc = new(Client, r);
                 vc.itemDropped += ItemDroppedHandler;
 
-
                 //记录到列表
                 vcs.Add(r.Address, vc);
 
@@ -79,6 +80,24 @@ namespace MyPlc2
                 if (r.Cycle == "100ms") queue_100ms.Enqueue(vc);
                 if (r.Cycle == "1s") queue_1s.Enqueue(vc);
 
+            }
+            //关联订阅
+            //worker_10.ReadEvent -= 
+            foreach (var vc in vcs)
+            {
+                Vc_d vc_d = vc.Value;
+
+                worker_10.ReadEvent += vc_d.HandleReadEvent;
+                worker_20.ReadEvent += vc_d.HandleReadEvent;
+                worker_50.ReadEvent += vc_d.HandleReadEvent;
+                worker_100.ReadEvent += vc_d.HandleReadEvent;
+                worker_1s.ReadEvent += vc_d.HandleReadEvent;
+
+                UpdatePlcClientEvent += vc_d.HandleUpdatePlcClientEvent;
+                UpdatePlcClientEvent += vc_d.HandleUpdatePlcClientEvent;
+                UpdatePlcClientEvent += vc_d.HandleUpdatePlcClientEvent;
+                UpdatePlcClientEvent += vc_d.HandleUpdatePlcClientEvent;
+                UpdatePlcClientEvent += vc_d.HandleUpdatePlcClientEvent;
             }
 
         }
@@ -146,31 +165,6 @@ namespace MyPlc2
             }
         }
 
-        //action：启动
-        private void ActionStartClick(object sender, EventArgs e)
-        {
-            //改变按钮背景色
-            BtnStartBgColor(true, false);
-            //生成读队列
-            CreateVcQueue();
-
-            try
-            {
-                Io.TryConnect();
-                Client = Io.GetClient();
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.ToString());
-                return;
-            }
-
-
-            //线程：PLC连接
-            ThreadPool.QueueUserWorkItem(CheckPlcConnect);
-
-        }
-
         private void ActionIoClick(object sender, EventArgs e)
         {
             //
@@ -234,30 +228,15 @@ namespace MyPlc2
             worker_100 = new(queue_100ms, 100, mutex);
             worker_1s = new(queue_1s, 1000, mutex);
 
-            //关联订阅
-            foreach (var vc in vcs)
-            {
-                Vc_d vc_d = vc.Value;
-
-                worker_10.ReadEvent += vc_d.HandleReadEvent;
-                worker_20.ReadEvent += vc_d.HandleReadEvent;
-                worker_50.ReadEvent += vc_d.HandleReadEvent;
-                worker_100.ReadEvent += vc_d.HandleReadEvent;
-                worker_1s.ReadEvent += vc_d.HandleReadEvent;
-
-                this.UpdatePlcClientEvent += vc_d.HandleUpdatePlcClientEvent;
-                this.UpdatePlcClientEvent += vc_d.HandleUpdatePlcClientEvent;
-                this.UpdatePlcClientEvent += vc_d.HandleUpdatePlcClientEvent;
-                this.UpdatePlcClientEvent += vc_d.HandleUpdatePlcClientEvent;
-                this.UpdatePlcClientEvent += vc_d.HandleUpdatePlcClientEvent;
-            }
-
             //线程池
             ThreadPool.QueueUserWorkItem(worker_10.Run, worker_10);
             ThreadPool.QueueUserWorkItem(worker_20.Run, worker_20);
             ThreadPool.QueueUserWorkItem(worker_50.Run, worker_50);
             ThreadPool.QueueUserWorkItem(worker_100.Run, worker_100);
             ThreadPool.QueueUserWorkItem(worker_1s.Run, worker_1s);
+
+            //PLC连接
+            ThreadPool.QueueUserWorkItem(CheckPlcConnect);
         }
 
         //事件：关闭
@@ -275,6 +254,15 @@ namespace MyPlc2
                 action_start.BackColor = System.Drawing.Color.Green;
             else
                 action_start.BackColor = SystemColors.Control;
+        }
+
+        //action：启动
+        private void ActionStartClick(object sender, EventArgs e)
+        {
+            //改变按钮背景色
+            BtnStartBgColor(true, false);
+            //生成读队列
+            CreateVcQueue();
         }
 
         //action:停止
@@ -298,32 +286,45 @@ namespace MyPlc2
         {
             while (true)
             {
-                if (!Client.Connected)
+                if (!ConnectState && Io.GetConnected())
                 {
-                    Io.TryConnect();
+                    ConnectState = true;
                     Client = Io.GetClient();
-                    if (Client.Connected)
+                    OnRaiseUpdatePlcClientEvent(Client);
+                }
+
+                if (!Io.GetConnected())
+                {
+                    ConnectState = false;
+
+                    Io.TryConnect();
+                }
+
+                if (Io.GetConnected())
+                {
+                    //连接
+                    CountOfClientLost = 0;
+                    //PlcStrip.BackColor = System.Drawing.Color.FromArgb(0, 0, 255);
+                }
+                else
+                {
+                    CountOfClientLost++;
+                    //PlcStrip.BackColor = System.Drawing.Color.FromArgb(192, 0, 0);
+                    if (CountOfClientLost % 10 == 0)
                     {
-                        //连接上
-                        CountOfClientLost = 0;
-                        PlcStrip.BackColor = System.Drawing.Color.FromArgb(0, 0, 255);
-                        //触发更新s7 client
-                        OnRaiseUpdatePlcClientEvent(Client);
-                    }
-                    else
-                    {
-                        CountOfClientLost++;
-                        PlcStrip.BackColor = System.Drawing.Color.FromArgb(192, 0, 0);
-                        if (CountOfClientLost % 10 == 0)
-                        {
-                            Debug.WriteLine("PLC连接丢失：" + CountOfClientLost.ToString());
-                        }
+                        Debug.WriteLine("PLC连接丢失：" + CountOfClientLost.ToString());
                     }
                 }
+
+
                 Thread.Sleep(5000);
             }
         }
 
+        private void SetStripColor(ref ToolStripLabel label, System.Drawing.Color color)
+        {
+            
+        }
 
         //程序窗口尺寸
         private void ChangeScreenSize()

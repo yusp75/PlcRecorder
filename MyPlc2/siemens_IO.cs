@@ -94,10 +94,6 @@ namespace MyPlc2
         public void TryConnect()
         {
             int rack = 0;
-            if (Client != null)
-            {
-                //Client = null;
-            }
 
             Client = new();
             Client.ConnTimeout = 5;
