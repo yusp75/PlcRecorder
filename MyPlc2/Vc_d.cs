@@ -10,28 +10,20 @@ namespace MyPlc2
         private Queue<Vc_d> MQueue;
         private bool Running = true;
         private readonly int Cycle;
-        private readonly S7Client Client;
         private Mutex mutex;
 
         //事件：读值
-        public event EventHandler<ReadEventArgs> ReadEvent;
+        public event EventHandler<ReadEventArgs>? ReadEvent;
 
-        public MyWorker(Queue<Vc_d> queue, S7Client client, int cycle, Mutex mutex)
+        public MyWorker(Queue<Vc_d> queue, int cycle, Mutex mutex)
         {
             MQueue = queue;
-            Client = client;
             Cycle = cycle;
             this.mutex = mutex;
         }
         protected virtual void OnRaiseReadEvent(string address, double value)
         {
-            EventHandler<ReadEventArgs> raiseEvent = ReadEvent;
-            // Event will be null if there are no subscribers
-            if (raiseEvent != null)
-            {
-                // raise the event.
-                raiseEvent(this, new ReadEventArgs(address, value));
-            }
+            ReadEvent?.Invoke(this, new ReadEventArgs(address, value));
         }
         public void Run(object threadContext)
         {
@@ -42,19 +34,16 @@ namespace MyPlc2
                     Vc_d vc = MQueue.Dequeue();
                     if (vc != null)
                     {
-                        vc.SetClient(Client);
-
                         //使用锁信号
                         mutex.WaitOne();
-                        if (Client != null && Client.Connected)
+                        //读
+                        if (vc.Read() == 0)
                         {
-                            if (vc.Read() == 0)
-                            {
-                                string address = vc.Address;
-                                double value = vc.Value;
-                                OnRaiseReadEvent(address, value);
-                            }
+                            string address = vc.Address;
+                            double value = vc.Value;
+                            OnRaiseReadEvent(address, value);
                         }
+
                         mutex.ReleaseMutex();
 
                         if (vc.Enable)
@@ -87,7 +76,7 @@ namespace MyPlc2
     //变量：解析，采集
     internal class Vc_d : Vc
     {
-        public S7Client? Client;
+        public S7Client? Client { get; set; }
 
         public string Address { get; set; }
         public double Value { get; set; }
@@ -279,7 +268,7 @@ namespace MyPlc2
         {
             Client = client;
         }
-
+        //订阅1
         public void Subscriber(string id, MyWorker pub)
         {
             _id = id;
@@ -309,6 +298,18 @@ namespace MyPlc2
             };
             //更新
             //Refresh();
+        }
+        //订阅：s7 client更新
+        public void SubscriberPlc(string id, Main pub)
+        {
+            _id = id;
+            // Subscribe to the event
+            pub.UpdatePlcClientEvent += HandleUpdatePlcClientEvent;
+        }
+        //事件处理：更新s7client
+        public void HandleUpdatePlcClientEvent(object sender, UpdatePlcClientEventArgs e)
+        {
+            Client = e.Client;
         }
 
         //取系统颜色

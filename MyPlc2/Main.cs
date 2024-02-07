@@ -11,7 +11,7 @@ namespace MyPlc2
     public partial class Main : Form
     {
         private bool updateVar = false;
-        private S7Client client;
+        private S7Client Client;
 
         private Queue<Vc_d> queue_10ms = new();
         private Queue<Vc_d> queue_20ms = new();
@@ -36,8 +36,10 @@ namespace MyPlc2
 
         private readonly string config_path = AppDomain.CurrentDomain.BaseDirectory + "\\config\\";
 
+        public event EventHandler<UpdatePlcClientEventArgs>? UpdatePlcClientEvent;
+
         //窗体
-        private Siemens400 io;
+        private Siemens400 Io;
 
         public Main()
         {
@@ -52,26 +54,19 @@ namespace MyPlc2
             //委托 双击
             mTreeView.dblClickDelegate += DblClicHandler;
 
-            //右键菜单
-
-
         }
 
-        private void VcIntoQueue()
+        private void CreateVcQueue()
         {
             //清空队列
-            queue_10ms.Clear();
-            queue_20ms.Clear();
-            queue_50ms.Clear();
-            queue_100ms.Clear();
-            queue_1s.Clear();
+            ClearQueue();
 
             //Vc_d入队列
             records = Vc_d.Parse();
             foreach (Record r in records)
             {
                 if (r == null) continue;
-                Vc_d vc = new(client, r);
+                Vc_d vc = new(Client, r);
                 vc.itemDropped += ItemDroppedHandler;
 
 
@@ -87,6 +82,19 @@ namespace MyPlc2
             }
 
         }
+
+        //函数：清空队列
+        private void ClearQueue()
+        {
+            queue_10ms.Clear();
+            queue_20ms.Clear();
+            queue_50ms.Clear();
+            queue_100ms.Clear();
+            queue_1s.Clear();
+
+            vcs.Clear();
+        }
+
         //响应：树形菜单双击 1
         private void DblClicHandler(string name, string address)
         {
@@ -141,12 +149,15 @@ namespace MyPlc2
         //action：启动
         private void ActionStartClick(object sender, EventArgs e)
         {
-            ChangeBgColor(true, false);
+            //改变按钮背景色
+            BtnStartBgColor(true, false);
+            //生成读队列
+            CreateVcQueue();
 
             try
             {
-                io.TryConnect();
-                this.client = io.GetClient();
+                Io.TryConnect();
+                Client = Io.GetClient();
             }
             catch (Exception ex)
             {
@@ -154,29 +165,6 @@ namespace MyPlc2
                 return;
             }
 
-            worker_10 = new(queue_10ms, client, 10, mutex);
-            worker_20 = new(queue_20ms, client, 20, mutex);
-            worker_50 = new(queue_50ms, client, 50, mutex);
-            worker_100 = new(queue_100ms, client, 100, mutex);
-            worker_1s = new(queue_1s, client, 1000, mutex);
-
-            //订阅
-            foreach (var vc in vcs)
-            {
-                Vc_d vc_d = vc.Value;
-                worker_10.ReadEvent += vc_d.HandleReadEvent;
-                worker_20.ReadEvent += vc_d.HandleReadEvent;
-                worker_50.ReadEvent += vc_d.HandleReadEvent;
-                worker_100.ReadEvent += vc_d.HandleReadEvent;
-                worker_1s.ReadEvent += vc_d.HandleReadEvent;
-            }
-
-            //线程：读
-            ThreadPool.QueueUserWorkItem(worker_10.Run, worker_10);
-            ThreadPool.QueueUserWorkItem(worker_20.Run, worker_20);
-            ThreadPool.QueueUserWorkItem(worker_50.Run, worker_50);
-            ThreadPool.QueueUserWorkItem(worker_100.Run, worker_100);
-            ThreadPool.QueueUserWorkItem(worker_1s.Run, worker_1s);
 
             //线程：PLC连接
             ThreadPool.QueueUserWorkItem(CheckPlcConnect);
@@ -213,9 +201,11 @@ namespace MyPlc2
 
         private void Main_Load(object sender, EventArgs e)
         {
-            //载入
-            io = new();
-            VcIntoQueue();
+            //窗体：载入
+
+            //初始化变量IO窗体
+            Io = new();
+
             //ChangeScreenSize();
             //读窗口位置
             try
@@ -236,6 +226,38 @@ namespace MyPlc2
             {
                 Debug.WriteLine(ex.ToString());
             }
+
+            //生成线程
+            worker_10 = new(queue_10ms, 10, mutex);
+            worker_20 = new(queue_20ms, 20, mutex);
+            worker_50 = new(queue_50ms, 50, mutex);
+            worker_100 = new(queue_100ms, 100, mutex);
+            worker_1s = new(queue_1s, 1000, mutex);
+
+            //关联订阅
+            foreach (var vc in vcs)
+            {
+                Vc_d vc_d = vc.Value;
+
+                worker_10.ReadEvent += vc_d.HandleReadEvent;
+                worker_20.ReadEvent += vc_d.HandleReadEvent;
+                worker_50.ReadEvent += vc_d.HandleReadEvent;
+                worker_100.ReadEvent += vc_d.HandleReadEvent;
+                worker_1s.ReadEvent += vc_d.HandleReadEvent;
+
+                this.UpdatePlcClientEvent += vc_d.HandleUpdatePlcClientEvent;
+                this.UpdatePlcClientEvent += vc_d.HandleUpdatePlcClientEvent;
+                this.UpdatePlcClientEvent += vc_d.HandleUpdatePlcClientEvent;
+                this.UpdatePlcClientEvent += vc_d.HandleUpdatePlcClientEvent;
+                this.UpdatePlcClientEvent += vc_d.HandleUpdatePlcClientEvent;
+            }
+
+            //线程池
+            ThreadPool.QueueUserWorkItem(worker_10.Run, worker_10);
+            ThreadPool.QueueUserWorkItem(worker_20.Run, worker_20);
+            ThreadPool.QueueUserWorkItem(worker_50.Run, worker_50);
+            ThreadPool.QueueUserWorkItem(worker_100.Run, worker_100);
+            ThreadPool.QueueUserWorkItem(worker_1s.Run, worker_1s);
         }
 
         //事件：关闭
@@ -246,8 +268,8 @@ namespace MyPlc2
         }
 
 
-        // 按钮改变背景色
-        private void ChangeBgColor(bool a, bool b)
+        // 改变按钮背景色
+        private void BtnStartBgColor(bool a, bool b)
         {
             if (a)
                 action_start.BackColor = System.Drawing.Color.Green;
@@ -258,7 +280,10 @@ namespace MyPlc2
         //action:停止
         private void ActionStopClick(object sender, EventArgs e)
         {
-            ChangeBgColor(false, true);
+            //按钮背景色
+            BtnStartBgColor(false, true);
+            //清空读队列
+            ClearQueue();
         }
 
         //历史数据分析
@@ -269,18 +294,26 @@ namespace MyPlc2
         }
 
         //定时检查s7 client连接
-        public void CheckPlcConnect(Object threadContext)
+        public void CheckPlcConnect(object threadContext)
         {
             while (true)
             {
-                if (!client.Connected)
+                if (!Client.Connected)
                 {
-                    io.TryConnect();
-                    this.client = io.GetClient();
-                    if (this.client.Connected) { CountOfClientLost = 0; }
+                    Io.TryConnect();
+                    Client = Io.GetClient();
+                    if (Client.Connected)
+                    {
+                        //连接上
+                        CountOfClientLost = 0;
+                        PlcStrip.BackColor = System.Drawing.Color.FromArgb(0, 0, 255);
+                        //触发更新s7 client
+                        OnRaiseUpdatePlcClientEvent(Client);
+                    }
                     else
                     {
                         CountOfClientLost++;
+                        PlcStrip.BackColor = System.Drawing.Color.FromArgb(192, 0, 0);
                         if (CountOfClientLost % 10 == 0)
                         {
                             Debug.WriteLine("PLC连接丢失：" + CountOfClientLost.ToString());
@@ -359,6 +392,11 @@ namespace MyPlc2
         {
             Token token = new();
             token.Show();
+        }
+
+        protected virtual void OnRaiseUpdatePlcClientEvent(S7Client client)
+        {
+            UpdatePlcClientEvent?.Invoke(this, new UpdatePlcClientEventArgs(client));
         }
 
         //

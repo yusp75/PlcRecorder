@@ -6,12 +6,11 @@ using ScottPlot;
 using ScottPlot.WinForms;
 using ScottPlot.AxisPanels;
 using ScottPlot.Plottables;
-using static Python.Runtime.TypeSpec;
-using ScottPlot.Colormaps;
-using ScottPlot.Control;
+
 
 namespace MyPlc2
 {
+    //事件：读值
     public class ReadEventArgs : EventArgs
     {
         public ReadEventArgs(string address, double value)
@@ -24,6 +23,7 @@ namespace MyPlc2
         public double Value { get; set; }
 
     }
+    //事件：更新读数据
     public class UpdateDataEventArgs : EventArgs
     {
         public UpdateDataEventArgs(string address, MPoint points)
@@ -35,6 +35,16 @@ namespace MyPlc2
         public string Address { get; set; }
         public MPoint Points { get; set; }
 
+    }
+    //事件：更新s7client
+    public class UpdatePlcClientEventArgs : EventArgs
+    {
+        public UpdatePlcClientEventArgs(S7Client? client)
+        {
+            Client = client;
+        }
+
+        public S7Client? Client { get; set; }
     }
     public class Record
     {
@@ -125,6 +135,7 @@ namespace MyPlc2
         //委托：拖曳
         public delegate void ItemDropped(string address, string parent);
         public ItemDropped itemDropped;
+
         //委托：删除图形
         public delegate void DeletePlotDelegate(string address);
         public DeletePlotDelegate delePlot;
@@ -153,7 +164,7 @@ namespace MyPlc2
             MFormsPlot.DragDrop += MFormsPlot_DragDrop;
 
             //鼠标右键菜单
-            var menu = (FormsPlotMenu)MFormsPlot.Menu;            
+            var menu = (FormsPlotMenu)MFormsPlot.Menu;
             menu.Clear();
 
             menu.Add("适应", FitPlot);
@@ -173,7 +184,7 @@ namespace MyPlc2
         //菜单：适应图形
         private void FitPlot(IPlotControl control)
         {
-            MFormsPlot.Plot.Axes.AutoScale(); 
+            MFormsPlot.Plot.Axes.AutoScale();
             Refresh();
         }
 

@@ -80,7 +80,7 @@
             btnSave.TabIndex = 7;
             btnSave.Text = "保存";
             btnSave.UseVisualStyleBackColor = true;
-            btnSave.Click += BtnSavePlcClick;
+            btnSave.Click += BtnSavePlc_Click;
             // 
             // lblPlcConnectd
             // 

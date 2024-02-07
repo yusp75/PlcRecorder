@@ -45,18 +45,24 @@ namespace MyPlc2
                     }
                 }
             } //if
+            else
+            {
+                this.ip = "127.0.0.1";
+                this.slot = 3;
+            }
+
         }
 
         private void BtnConnect_Click(object sender, EventArgs e)
         {
             //连接
-            this.Connect();
+            Connect();
 
         }
 
         public void Connect()
         {
-            String ip = this.txtIP.Text.Replace(" ", "");
+            string ip = this.txtIP.Text.Replace(" ", "");
             int rack = 0;
             int slot = (int)this.txtSlot.Value;
             //this.client.SetConnectionType(0x02);
@@ -94,33 +100,33 @@ namespace MyPlc2
             }
 
             Client = new();
-            this.Client.ConnTimeout = 5;
+            Client.ConnTimeout = 5;
 
             if (!Client.Connected)
             {
-                int code = this.Client.ConnectTo(this.ip, rack, this.slot);
+                int code = Client.ConnectTo(this.ip, rack, this.slot);
                 if (code > 0)
                 {
-                    log.Error("尝试连接失败：" + this.Client.ErrorText(code));
+                    log.Error("尝试连接失败：" + Client.ErrorText(code));
                 }
 
-                this.isConnected = this.Client.Connected;
+                this.isConnected = Client.Connected;
             }
         }
 
         private void UpdateLblStatus(String msg, Color color)
         {
             //更新PLC连接状态
-            this.lblPlcConnectd.Text = msg;
-            this.lblPlcConnectd.BackColor = color;
+            lblPlcConnectd.Text = msg;
+            lblPlcConnectd.BackColor = color;
         }
 
         public bool GetConnected()
         {
-            return Client.Connected;
+            return Client != null && Client.Connected;
         }
 
-        public S7Client GetClient()
+        public S7Client? GetClient()
         {
             return Client;
         }
@@ -208,7 +214,7 @@ namespace MyPlc2
 
         }
 
-        private void BtnSavePlcClick(object sender, EventArgs e)
+        private void BtnSavePlc_Click(object sender, EventArgs e)
         {
             //保存plc参数
             try

@@ -34,14 +34,14 @@ namespace MyPlc2
                 {
                     client = new InfluxDBClient("http://127.0.0.1:8086", token);
                     //关闭log
-                    client.SetLogLevel(InfluxDB.Client.Core.LogLevel.None);                      
+                    client.SetLogLevel(InfluxDB.Client.Core.LogLevel.None);
 
                 }
             }
             catch (Exception ex)
             {
-                //Debug.WriteLine("异常：" + ex.Message);
-                log.Error(ex.Message);
+                Debug.WriteLine("Db Connect: " + ex.Message);
+                //log.Error(ex.Message);
 
             }
         }
@@ -65,6 +65,7 @@ namespace MyPlc2
             {
                 writeApi.WriteMeasurement<MyTypes>(mem, WritePrecision.Ms, bucket, org);
             }
+
         }
 
         public async Task<Dictionary<string, MPoint>> Query(string addresses, string start, string stop)

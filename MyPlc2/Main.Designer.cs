@@ -39,7 +39,11 @@
             acttion_stop = new ToolStripButton();
             btnIO = new ToolStripButton();
             action_history = new ToolStripButton();
+            InfluxDbToken = new ToolStripButton();
             action_exit = new ToolStripButton();
+            toolStripSeparator1 = new ToolStripSeparator();
+            PlcStrip = new ToolStripLabel();
+            DbStrip = new ToolStripLabel();
             split_0 = new SplitContainer();
             split1 = new SplitContainer();
             table1 = new TableLayoutPanel();
@@ -49,7 +53,6 @@
             message = new DataGridViewTextBoxColumn();
             type = new DataGridViewTextBoxColumn();
             time = new DataGridViewTextBoxColumn();
-            InfluxDbToken = new ToolStripButton();
             menuStrip1.SuspendLayout();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)split_0).BeginInit();
@@ -100,7 +103,7 @@
             // 
             // toolStrip1
             // 
-            toolStrip1.Items.AddRange(new ToolStripItem[] { action_start, acttion_stop, btnIO, action_history, InfluxDbToken, action_exit });
+            toolStrip1.Items.AddRange(new ToolStripItem[] { action_start, acttion_stop, btnIO, action_history, InfluxDbToken, action_exit, toolStripSeparator1, PlcStrip, DbStrip });
             toolStrip1.Location = new Point(0, 25);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new Size(800, 25);
@@ -149,6 +152,16 @@
             action_history.Text = "历史曲线";
             action_history.Click += ActionHistoryClick;
             // 
+            // InfluxDbToken
+            // 
+            InfluxDbToken.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            InfluxDbToken.Image = (Image)resources.GetObject("InfluxDbToken.Image");
+            InfluxDbToken.ImageTransparentColor = Color.Magenta;
+            InfluxDbToken.Name = "InfluxDbToken";
+            InfluxDbToken.Size = new Size(23, 22);
+            InfluxDbToken.Text = "Token";
+            InfluxDbToken.Click += InfluxDbToken_Click;
+            // 
             // action_exit
             // 
             action_exit.DisplayStyle = ToolStripItemDisplayStyle.Image;
@@ -158,6 +171,35 @@
             action_exit.Size = new Size(23, 22);
             action_exit.Text = "退出";
             action_exit.Click += ActionExitClick;
+            // 
+            // toolStripSeparator1
+            // 
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new Size(6, 25);
+            // 
+            // PlcStrip
+            // 
+            PlcStrip.ActiveLinkColor = Color.Transparent;
+            PlcStrip.Alignment = ToolStripItemAlignment.Right;
+            PlcStrip.BackColor = Color.FromArgb(192, 0, 0);
+            PlcStrip.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            PlcStrip.ForeColor = Color.FromArgb(192, 0, 0);
+            PlcStrip.Name = "PlcStrip";
+            PlcStrip.Size = new Size(24, 22);
+            PlcStrip.Text = "Plc";
+            // 
+            // DbStrip
+            // 
+            DbStrip.ActiveLinkColor = Color.Transparent;
+            DbStrip.Alignment = ToolStripItemAlignment.Right;
+            DbStrip.BackColor = SystemColors.Highlight;
+            DbStrip.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            DbStrip.ForeColor = Color.FromArgb(192, 0, 0);
+            DbStrip.Name = "DbStrip";
+            DbStrip.RightToLeft = RightToLeft.Yes;
+            DbStrip.Size = new Size(56, 22);
+            DbStrip.Text = "InfluxDB";
+            DbStrip.ToolTipText = "Db connected";
             // 
             // split_0
             // 
@@ -199,12 +241,12 @@
             // 
             // table1
             // 
+            table1.Anchor = AnchorStyles.Right;
             table1.AutoScroll = true;
             table1.AutoScrollMinSize = new Size(0, 300);
             table1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             table1.ColumnCount = 1;
             table1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            table1.Dock = DockStyle.Fill;
             table1.Location = new Point(0, 0);
             table1.Margin = new Padding(1);
             table1.MinimumSize = new Size(632, 300);
@@ -260,16 +302,6 @@
             time.Name = "time";
             time.ReadOnly = true;
             // 
-            // InfluxDbToken
-            // 
-            InfluxDbToken.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            InfluxDbToken.Image = (Image)resources.GetObject("InfluxDbToken.Image");
-            InfluxDbToken.ImageTransparentColor = Color.Magenta;
-            InfluxDbToken.Name = "InfluxDbToken";
-            InfluxDbToken.Size = new Size(23, 22);
-            InfluxDbToken.Text = "Token";
-            InfluxDbToken.Click += InfluxDbToken_Click;
-            // 
             // Main
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
@@ -322,5 +354,8 @@
         private StatusStrip status1;
         private ToolStripButton action_exit;
         private ToolStripButton InfluxDbToken;
+        private ToolStripSeparator toolStripSeparator1;
+        private ToolStripLabel PlcStrip;
+        private ToolStripLabel DbStrip;
     }
 }
