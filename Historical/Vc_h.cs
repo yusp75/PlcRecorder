@@ -3,6 +3,7 @@ using ScottPlot;
 using MyPlc2;
 using System.Diagnostics;
 using ScottPlot.Legends;
+using ScottPlot.AxisPanels;
 
 namespace Historical
 {
@@ -39,8 +40,9 @@ namespace Historical
 
             // 计算图形index
             int idx = CalIndex(address, Points);
+            var axis = (LeftAxis)plot.Axes.Left;
             //AddToAxises(idx);
-            SetupPlot(idx, ref subPlot);
+            SetupPlot(idx, ref subPlot, ref axis);
 
             //有数据时刷新
             if (Points.x.Count > 0) Refresh();
@@ -98,7 +100,7 @@ namespace Historical
 
             //0-1图形？
             int idx = CalIndex(address, Points);
-            SetupPlot(idx, ref subPlot);
+            SetupPlot(idx, ref subPlot,ref axis);
 
             //有数据时刷新
             if (points.x.Count > 0) Refresh();

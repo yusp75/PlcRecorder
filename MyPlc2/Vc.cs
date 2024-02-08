@@ -526,11 +526,18 @@ namespace MyPlc2
         }
 
         //设置图形
-        public void SetupPlot(int idx, ref Scatter subPlot, int space = 3)
+        public void SetupPlot(int idx, ref Scatter subPlot, ref LeftAxis axis, int space = 3)
         {
             int base_line = 50;
 
-            var my_axis = Axises[idx].MyLeftAxis;
+            LeftAxis my_axis;
+            if (Axises.Count > 0)
+            {
+                my_axis = Axises[idx].MyLeftAxis;
+            } else
+            {
+                my_axis = axis;
+            }
             var plot = MFormsPlot.Plot;
 
             //plt.AddCrosshair(30, 0.36);
@@ -556,7 +563,7 @@ namespace MyPlc2
             {
                 Axis_lg_Count++;
 
-                //subPlot.Data.YOffset = space * Axis_lg_Count + base_line;
+                //subPlot.Data.OffSet = space * Axis_lg_Count + base_line;
                 plot.Axes.SetLimitsY(-1 * idx, idx, my_axis);
             }
         }
