@@ -8,7 +8,7 @@ namespace MyPlc2
     internal class MyWorker
     {
         private Queue<Vc_d> MQueue;
-        private bool Running = true;
+        public bool Running { get; set; } = true;
         private readonly int Cycle;
         private Mutex mutex;
 
@@ -27,7 +27,7 @@ namespace MyPlc2
         }
         public void Run(object threadContext)
         {
-            while (Running)
+            while (true)
             {
                 if (MQueue.Count > 0)
                 {
@@ -46,7 +46,7 @@ namespace MyPlc2
 
                         mutex.ReleaseMutex();
 
-                        if (vc.Enable)
+                        if (vc.Enable && Running)
                         {
                             MQueue.Enqueue(vc);
                         }

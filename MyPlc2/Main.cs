@@ -38,7 +38,8 @@ namespace MyPlc2
         private readonly string config_path = AppDomain.CurrentDomain.BaseDirectory + "\\config\\";
 
         public event EventHandler<UpdatePlcClientEventArgs>? UpdatePlcClientEvent;
-        private delegate void UpdateStripLabel(ref ToolStripLabel label, System.Drawing.Color color);
+        private delegate void UpdateStripLabelDelegate(ref ToolStripLabel label, System.Drawing.Color color);
+        private UpdateStripLabelDelegate updateStripLabelDelegate = UpdateStripLabel;
 
         //窗体
         private Siemens400 Io;
@@ -103,7 +104,7 @@ namespace MyPlc2
         }
 
         //函数：清空队列
-        private void ClearQueue()
+        private void ClearQueue(bool stop = false)
         {
             queue_10ms.Clear();
             queue_20ms.Clear();
@@ -112,6 +113,24 @@ namespace MyPlc2
             queue_1s.Clear();
 
             vcs.Clear();
+
+            if (stop)
+            {
+                worker_10.Running = false;
+                worker_20.Running = false;
+                worker_50.Running = false;
+                worker_100.Running = false;
+                worker_1s.Running = false;
+            }
+            else
+            {
+                worker_10.Running = true;
+                worker_20.Running = true;
+                worker_50.Running = true;
+                worker_100.Running = true;
+                worker_1s.Running = true;
+            }
+
         }
 
         //响应：树形菜单双击 1
@@ -271,7 +290,7 @@ namespace MyPlc2
             //按钮背景色
             BtnStartBgColor(false, true);
             //清空读队列
-            ClearQueue();
+            ClearQueue(true);
         }
 
         //历史数据分析
@@ -305,6 +324,8 @@ namespace MyPlc2
                     //连接
                     CountOfClientLost = 0;
                     //PlcStrip.BackColor = System.Drawing.Color.FromArgb(0, 0, 255);
+                    //updateStripLabelDelegate(ref PlcStrip, System.Drawing.Color.FromArgb(0, 0, 255));
+
                 }
                 else
                 {
@@ -319,11 +340,6 @@ namespace MyPlc2
 
                 Thread.Sleep(5000);
             }
-        }
-
-        private void SetStripColor(ref ToolStripLabel label, System.Drawing.Color color)
-        {
-            
         }
 
         //程序窗口尺寸
@@ -400,6 +416,10 @@ namespace MyPlc2
             UpdatePlcClientEvent?.Invoke(this, new UpdatePlcClientEventArgs(client));
         }
 
+        private static void UpdateStripLabel(ref ToolStripLabel label, System.Drawing.Color color)
+        {
+            label.ForeColor = color;
+        }
         //
     }
 }

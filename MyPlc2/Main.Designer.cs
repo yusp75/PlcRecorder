@@ -241,12 +241,12 @@
             // 
             // table1
             // 
-            table1.Anchor = AnchorStyles.Right;
             table1.AutoScroll = true;
             table1.AutoScrollMinSize = new Size(0, 300);
             table1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             table1.ColumnCount = 1;
             table1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            table1.Dock = DockStyle.Fill;
             table1.Location = new Point(0, 0);
             table1.Margin = new Padding(1);
             table1.MinimumSize = new Size(632, 300);
