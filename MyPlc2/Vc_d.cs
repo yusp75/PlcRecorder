@@ -278,7 +278,7 @@ namespace MyPlc2
         }
 
         //事件处理：读取
-        public void HandleReadEvent(object sender, ReadEventArgs e)
+        public void HandleReadEvent(object? sender, ReadEventArgs e)
         {
             string address = e.Address;
             double value = e.Value;
@@ -307,7 +307,7 @@ namespace MyPlc2
             pub.UpdatePlcClientEvent += HandleUpdatePlcClientEvent;
         }
         //事件处理：更新s7client
-        public void HandleUpdatePlcClientEvent(object sender, UpdatePlcClientEventArgs e)
+        public void HandleUpdatePlcClientEvent(object? sender, UpdatePlcClientEventArgs e)
         {
             Client = e.Client;
         }

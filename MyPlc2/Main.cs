@@ -11,7 +11,7 @@ namespace MyPlc2
     public partial class Main : Form
     {
         private bool updateVar = false;
-        private S7Client Client;
+        private S7Client? Client;
 
         private Queue<Vc_d> queue_10ms = new();
         private Queue<Vc_d> queue_20ms = new();
@@ -19,11 +19,11 @@ namespace MyPlc2
         private Queue<Vc_d> queue_100ms = new();
         private Queue<Vc_d> queue_1s = new();
 
-        private MyWorker worker_10;
-        private MyWorker worker_20;
-        private MyWorker worker_50;
-        private MyWorker worker_100;
-        private MyWorker worker_1s;
+        private MyWorker? worker_10;
+        private MyWorker? worker_20;
+        private MyWorker? worker_50;
+        private MyWorker? worker_100;
+        private MyWorker? worker_1s;
 
         private static Mutex mutex = new Mutex(false);
 
