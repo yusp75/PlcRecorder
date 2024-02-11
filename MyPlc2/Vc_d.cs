@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using ScottPlot;
 using ScottPlot.AxisPanels;
+using System.Net;
 
 namespace MyPlc2
 {
@@ -11,19 +12,13 @@ namespace MyPlc2
         public bool Running { get; set; } = true;
         private readonly int Cycle;
         private Mutex mutex;
-
         //事件：读值
         public event EventHandler<ReadEventArgs>? ReadEvent;
-
         public MyWorker(Queue<Vc_d> queue, int cycle, Mutex mutex)
         {
             MQueue = queue;
             Cycle = cycle;
             this.mutex = mutex;
-        }
-        protected virtual void OnRaiseReadEvent(string address, double value)
-        {
-            ReadEvent?.Invoke(this, new ReadEventArgs(address, value));
         }
         public void Run(object threadContext)
         {
@@ -43,6 +38,7 @@ namespace MyPlc2
                             double value = vc.Value;
                             OnRaiseReadEvent(address, value);
                         }
+                        vc.Read();
 
                         mutex.ReleaseMutex();
 
@@ -63,6 +59,10 @@ namespace MyPlc2
 
             } //while
         }
+        protected virtual void OnRaiseReadEvent(string address, double value)
+        {
+            ReadEvent?.Invoke(this, new ReadEventArgs(address, value));
+        }
         public void SetRunning(bool running)
         {
             Running = running;
@@ -80,7 +80,7 @@ namespace MyPlc2
 
         public string Address { get; set; }
         public double Value { get; set; }
-
+        private Db db = new();
         private List<LegendItem> Legends { get; set; } = new();
 
         //画面队列
@@ -237,22 +237,12 @@ namespace MyPlc2
             {
                 string raw_value = ByteArrayToString(data);
                 double value = CalByteArray(data, r.WordLen, pos);
-                Debug.WriteLine("读{0}:{1}", r.Address, value);
+                //Debug.WriteLine("读{0}:{1}", r.Address, value);
 
                 //向事件传递值
-                this.Address = r.Address;
-                this.Value = value;
-
-                //db
-                try
-                {
-                    Db db = new();
-                    db.Write(r.Name, r.Address, r.Bit_pos, raw_value, value, r.WordLen);
-                }
-                catch (ArgumentException e)
-                {
-                    Debug.WriteLine("Vc.Read, db wrtie: " + e.ToString());
-                }
+                Address = r.Address;
+                Value = value;
+                Task task = db.WriteAsync(r.Name, r.Address, r.Bit_pos, raw_value, value, r.WordLen);
 
             }
 
@@ -296,8 +286,6 @@ namespace MyPlc2
                     }
                 }
             };
-            //更新
-            //Refresh();
         }
         //订阅：s7 client更新
         public void SubscriberPlc(string id, Main pub)
@@ -372,7 +360,7 @@ namespace MyPlc2
             Axises.Clear();
             StreamerArray.Clear();
 
-            //display original plot
+            //显示 original plot
             AddStreamer();
 
             MFormsPlot.Refresh();

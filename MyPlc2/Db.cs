@@ -8,7 +8,7 @@ namespace MyPlc2
     {
         private string token = "";
         private const string bucket = "plc";
-        private const string org = "yu";
+        private const string org = "abc";
         private InfluxDBClient client;
 
         private readonly string config_path = AppDomain.CurrentDomain.BaseDirectory + "\\config\\";
@@ -38,7 +38,7 @@ namespace MyPlc2
 
                 }
             }
-            catch (Exception ex)
+            catch (HttpRequestException ex)
             {
                 Debug.WriteLine("Db Connect: " + ex.Message);
                 //log.Error(ex.Message);
@@ -46,9 +46,10 @@ namespace MyPlc2
             }
         }
 
-        public void Write(string name, string address, int pos, string raw_value, double value, int word_len)
+        public async Task WriteAsync(string name, string address, int pos, string raw_value, double value, int word_len)
         {
             if (client is null) return;
+            //var status = await client.PingAsync();
 
             var mem = new MyTypes
             {
@@ -61,11 +62,8 @@ namespace MyPlc2
                 Time = DateTime.Now
             };
 
-            using (var writeApi = client.GetWriteApi())
-            {
-                writeApi.WriteMeasurement<MyTypes>(mem, WritePrecision.Ms, bucket, org);
-            }
-
+            var writeApi = client.GetWriteApiAsync();
+            await writeApi.WriteMeasurementAsync(mem, WritePrecision.Ms, bucket, org);
         }
 
         public async Task<Dictionary<string, MPoint>> Query(string addresses, string start, string stop)
