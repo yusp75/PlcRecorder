@@ -7,8 +7,29 @@ using ScottPlot.AxisPanels;
 
 namespace Historical
 {
+    public class NearestValue
+    {
+        private string Address { get; set; }
+        private string X { get; set; }
+        private string Y { get; set; }
 
-    //变量：解析，采集
+        public NearestValue(string address, string x, string y)
+        {
+            Address = address;
+            X = x;
+            Y = y;
+        }
+    }
+    public class NearestValueEventArgs : EventArgs
+    {
+        private List<NearestValue> Values { get; set; }
+
+        public NearestValueEventArgs(List<NearestValue> values)
+        {
+            Values = values;
+        }
+    }
+
     internal class Vc_h : Vc
     {
         //多画面队列 添加/移除
@@ -17,12 +38,18 @@ namespace Historical
         private string _id;
         //在table布局行数
         public int Position { get; set; }
+        private Crosshair MCrosshair;
+
+        public event EventHandler<NearestValueEventArgs> NearestValueEvent;
 
         public Vc_h(Record record) : base(record)
         {
 
         }
-
+        private void OnRaiseNearestValueEvent(List<NearestValue> values)
+        {
+            NearestValueEvent?.Invoke(this, new NearestValueEventArgs(values));
+        }
         //双击：增加plot 1
         public void AddPlot()
         {
@@ -36,7 +63,23 @@ namespace Historical
             plot.Legend.IsVisible = true;
             //legend
             var subPlot = plot.Add.Scatter(Points.x.ToArray(), Points.y.ToArray());
-            subPlot.Label = address;            
+            subPlot.Label = address;
+            MCrosshair = plot.Add.Crosshair(0, 0);
+            MCrosshair.HorizontalLineIsVisible = false;
+            
+            MFormsPlot.MouseDown += (s, e) =>
+            {
+                Pixel mousePixel = new(e.X, e.Y);
+                Coordinates mouseCoordinates = MFormsPlot.Plot.GetCoordinates(mousePixel);
+                MCrosshair.Position = new Coordinates(mouseCoordinates.X, 0);
+
+                //事件传值给gridview
+                List<NearestValue> values = new();
+                DataPoint nearest = subPlot.Data.GetNearest(mouseCoordinates, plot.LastRender);
+
+                values.Add(new NearestValue(MRecord.Address, nearest.X.ToString(), nearest.Y.ToString()));
+                OnRaiseNearestValueEvent(values);
+            };
 
             // 计算图形index
             int idx = CalIndex(address, Points);
@@ -61,8 +104,8 @@ namespace Historical
                 if (PlotArray.ContainsKey(address))
                 {
                     Scatter plot = PlotArray[address];
-                    plot = MFormsPlot.Plot.Add.Scatter(points.x.ToArray(), points.y.ToArray());                    
-                    
+                    plot = MFormsPlot.Plot.Add.Scatter(points.x.ToArray(), points.y.ToArray());
+
                     //设置X轴limit
                     //plot.AxisAuto();
 
@@ -96,11 +139,11 @@ namespace Historical
             subPlot.Label = address;
             //分配轴
             var axis = WhichAxis(address, points);
-            subPlot.Axes.YAxis = axis;            
+            subPlot.Axes.YAxis = axis;
 
             //0-1图形？
             int idx = CalIndex(address, Points);
-            SetupPlot(idx, ref subPlot,ref axis);
+            SetupPlot(idx, ref subPlot, ref axis);
 
             //有数据时刷新
             if (points.x.Count > 0) Refresh();
@@ -132,7 +175,7 @@ namespace Historical
         public override void ClearPlot(IPlotControl control)
         {
             //clear legend
-            var a= MFormsPlot.Plot.Legend;
+            var a = MFormsPlot.Plot.Legend;
 
             //clear plot
             MFormsPlot.Plot.Clear();
@@ -141,7 +184,7 @@ namespace Historical
             {
                 MFormsPlot.Plot.Axes.Remove(yAxises[i]);
             }
-            
+
             Axises.Clear();
             PlotArray.Clear();
 

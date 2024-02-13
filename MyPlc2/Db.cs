@@ -9,7 +9,7 @@ namespace MyPlc2
         private string token = "";
         private const string bucket = "plc";
         private const string org = "abc";
-        private InfluxDBClient client;
+        private InfluxDBClient? client;
 
         private readonly string config_path = AppDomain.CurrentDomain.BaseDirectory + "\\config\\";
 

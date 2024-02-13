@@ -98,8 +98,10 @@ namespace Historical
                 d.MinimumSize = new Size(0, 300);
 
                 table1.Controls.Add(d);
-
+                //关联
                 vc.delePlot += DeletePlotHandler;
+                vc.NearestValueEvent += HandleNearestValueEvent;
+
                 vc.AddPlot();
             }
             catch (KeyNotFoundException ex)
@@ -112,6 +114,12 @@ namespace Historical
                 UpdateStatus(ex.Message);
             }
 
+        }
+
+        //处理：显示最近值
+        private void HandleNearestValueEvent(object? sender, NearestValueEventArgs e)
+        {
+            var v = e;
         }
 
         //处理：删除图形
