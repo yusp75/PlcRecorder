@@ -4,6 +4,7 @@ using MyPlc2;
 using System.Diagnostics;
 using ScottPlot.Legends;
 using ScottPlot.AxisPanels;
+using System.Security.Cryptography;
 
 namespace Historical
 {
@@ -80,19 +81,28 @@ namespace Historical
 
                 /*              Pixel mousePixel = new(e.X, e.Y);
                                 Coordinates mouseCoordinates = MFormsPlot.Plot.GetCoordinates(mousePixel);
-
-
-                                //事件传值给gridview
-                                List<NearestValue> values = new();
-                                DataPoint nearest = subPlot.Data.GetNearest(mouseCoordinates, plot.LastRender);
-
-                                values.Add(new NearestValue(MRecord.Address, nearest.X.ToString(), nearest.Y.ToString()));
-                                OnRaiseNearestValueEvent(values);*/
+*/
             };
             //鼠标：松开
             MFormsPlot.MouseUp += (s, e) =>
             {
-                LineBeingDragged = null;
+                if (LineBeingDragged != null)
+                {
+                    var x = ((VerticalLine)LineBeingDragged).X;
+                    //事件传值给gridview
+                    var y = 0.0;
+                    foreach (var p in PlotArray)
+                    {
+                        var a = p.Value.Data.GetScatterPoints().ToList();
+                        y = FindNearestValue(a,x);
+                    }
+
+                    List<NearestValue> values = new();
+                    values.Add(new NearestValue(MRecord.Address, x.ToString(), y.ToString()));
+                    OnRaiseNearestValueEvent(values);
+
+                    LineBeingDragged = null;
+                }
                 MFormsPlot.Interaction.Enable();
 
             };
@@ -129,7 +139,8 @@ namespace Historical
             //有数据时刷新
             if (Points.x.Count > 0) Refresh();
 
-            PlotArray.Add(MRecord.Address, subPlot);
+            //PlotArray.Add(MRecord.Address, subPlot);
+            PlotArray[MRecord.Address] = subPlot;
         }
 
         //更新数据，刷新
@@ -247,8 +258,47 @@ namespace Historical
 
             return null;
         }
+
+        //二分法：在a中找x
+        private int bisect_left(List<Coordinates> a, double x, int lo = 0, int hi = 0)
+        {
+            if (hi == 0) hi = a.Count();
+
+            while (lo < hi)
+            {
+                int mid = (lo + hi);
+                if (a[mid].X < x)
+                    lo = mid + 1;
+                else
+                    hi = mid;
+            }
+
+            return lo;
+        }
+
+        private double FindNearestValue(List<Coordinates> a, double x, int lo = 0, int hi = 0)
+        {
+            //检查边界
+            if (hi == 0)
+                hi = a.Count() - 1;
+            if (x >= a[hi].X)
+                return a[hi].Y;
+            else if (x <= a[0].X)
+                return a[0].Y;
+            
+            //二分法查找
+            int pos = bisect_left(a, x, lo, hi);
+            double x1 = a[pos - 1].X;
+            double x2 = a[pos].X;
+
+            if (x2 - x < x - x1)
+                return a[pos].Y;
+            else
+                return a[pos - 1].Y;
+
+        }
+
         //
     }
-
 
 }
