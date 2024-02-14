@@ -38,7 +38,8 @@ namespace Historical
         private string _id;
         //在table布局行数
         public int Position { get; set; }
-        private Crosshair MCrosshair;
+        private VerticalLine MCrosshair;
+        private AxisLine? LineBeingDragged = null;
 
         public event EventHandler<NearestValueEventArgs> NearestValueEvent;
 
@@ -64,21 +65,59 @@ namespace Historical
             //legend
             var subPlot = plot.Add.Scatter(Points.x.ToArray(), Points.y.ToArray());
             subPlot.Label = address;
-            MCrosshair = plot.Add.Crosshair(0, 0);
-            MCrosshair.HorizontalLineIsVisible = false;
-            
+            MCrosshair = plot.Add.VerticalLine(0, color: ScottPlot.Color.FromHex("#FF0000"), width: 1);
+            MCrosshair.IsDraggable = true;
+            //鼠标：按下
             MFormsPlot.MouseDown += (s, e) =>
             {
-                Pixel mousePixel = new(e.X, e.Y);
-                Coordinates mouseCoordinates = MFormsPlot.Plot.GetCoordinates(mousePixel);
-                MCrosshair.Position = new Coordinates(mouseCoordinates.X, 0);
+                var lineUnderMouse = GetLineUnderMouse(e.X, e.Y);
+                if (lineUnderMouse != null)
+                {
+                    LineBeingDragged = lineUnderMouse;
+                    MFormsPlot.Interaction.Disable();
+                }
 
-                //事件传值给gridview
-                List<NearestValue> values = new();
-                DataPoint nearest = subPlot.Data.GetNearest(mouseCoordinates, plot.LastRender);
 
-                values.Add(new NearestValue(MRecord.Address, nearest.X.ToString(), nearest.Y.ToString()));
-                OnRaiseNearestValueEvent(values);
+                /*              Pixel mousePixel = new(e.X, e.Y);
+                                Coordinates mouseCoordinates = MFormsPlot.Plot.GetCoordinates(mousePixel);
+
+
+                                //事件传值给gridview
+                                List<NearestValue> values = new();
+                                DataPoint nearest = subPlot.Data.GetNearest(mouseCoordinates, plot.LastRender);
+
+                                values.Add(new NearestValue(MRecord.Address, nearest.X.ToString(), nearest.Y.ToString()));
+                                OnRaiseNearestValueEvent(values);*/
+            };
+            //鼠标：松开
+            MFormsPlot.MouseUp += (s, e) =>
+            {
+                LineBeingDragged = null;
+                MFormsPlot.Interaction.Enable();
+
+            };
+            //鼠标：移动
+            MFormsPlot.MouseMove += (s, e) =>
+            {
+                CoordinateRect rect = MFormsPlot.Plot.GetCoordinateRect(e.X, e.Y, radius: 10);
+                if (LineBeingDragged is null)
+                {
+
+                    var lineUnderMouse = GetLineUnderMouse(e.X, e.Y);
+                    if (lineUnderMouse is null) MFormsPlot.Cursor = Cursors.Default;
+                    else if (lineUnderMouse.IsDraggable && lineUnderMouse is VerticalLine) MFormsPlot.Cursor = Cursors.SizeWE;
+                }
+                else
+                {
+                    // update the position of the plottable being dragged
+                    if (LineBeingDragged is VerticalLine vl)
+                    {
+                        vl.X = rect.HorizontalCenter;
+                        //vl.Text = $"{vl.X:0.00}";
+                    }
+
+                    MFormsPlot.Refresh();
+                }
             };
 
             // 计算图形index
@@ -193,6 +232,20 @@ namespace Historical
 
             MFormsPlot.Refresh();
 
+        }
+
+        //判断AxisLine在鼠标下方
+        private AxisLine? GetLineUnderMouse(float x, float y)
+        {
+            var plot = MFormsPlot.Plot;
+            CoordinateRect rect = plot.GetCoordinateRect(x, y, radius: 10);
+            foreach (AxisLine axLine in plot.GetPlottables<AxisLine>().Reverse())
+            {
+                if (axLine.IsUnderMouse(rect))
+                    return axLine;
+            }
+
+            return null;
         }
         //
     }
