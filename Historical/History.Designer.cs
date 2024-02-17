@@ -225,9 +225,10 @@
             // col_X
             // 
             col_X.HeaderText = "X值";
-            col_X.MinimumWidth = 50;
+            col_X.MinimumWidth = 100;
             col_X.Name = "col_X";
             col_X.ReadOnly = true;
+            col_X.Width = 200;
             // 
             // col_Y
             // 

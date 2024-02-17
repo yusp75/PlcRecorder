@@ -74,7 +74,7 @@ namespace Historical
             //垂直尺
             MCrosshair = plot.Add.VerticalLine(x_array[0].ToOADate(), color: ScottPlot.Color.FromHex("#FF0000"), width: 1);
             MCrosshair.IsDraggable = true;
-            
+
             //自动缩放Axis
             plot.Axes.AutoScaleX();
 
@@ -295,7 +295,7 @@ namespace Historical
 
             while (lo < hi)
             {
-                int mid = (lo + hi);
+                int mid = (lo + hi) / 2;
                 if (a[mid].X < x)
                     lo = mid + 1;
                 else
