@@ -202,10 +202,13 @@
             // 
             // dg1
             // 
+            dg1.AllowUserToDeleteRows = false;
+            dg1.AllowUserToOrderColumns = true;
             dg1.BackgroundColor = SystemColors.Control;
             dg1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dg1.Columns.AddRange(new DataGridViewColumn[] { col_address, col_X, col_Y });
             dg1.Dock = DockStyle.Bottom;
+            dg1.EditMode = DataGridViewEditMode.EditProgrammatically;
             dg1.Location = new Point(3, 401);
             dg1.Name = "dg1";
             dg1.RowTemplate.Height = 25;

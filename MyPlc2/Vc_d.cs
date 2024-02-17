@@ -207,7 +207,6 @@ namespace MyPlc2
             MFormsPlot.Refresh();
         }
 
-
         public override int Read()
         {
             //读PLC

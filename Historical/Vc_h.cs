@@ -4,15 +4,14 @@ using MyPlc2;
 using System.Diagnostics;
 using ScottPlot.Legends;
 using ScottPlot.AxisPanels;
-using System.Security.Cryptography;
 
 namespace Historical
 {
     public class NearestValue
     {
-        private string Address { get; set; }
-        private string X { get; set; }
-        private string Y { get; set; }
+        public string Address { get; set; }
+        public string X { get; set; }
+        public string Y { get; set; }
 
         public NearestValue(string address, string x, string y)
         {
@@ -23,7 +22,7 @@ namespace Historical
     }
     public class NearestValueEventArgs : EventArgs
     {
-        private List<NearestValue> Values { get; set; }
+        public List<NearestValue> Values { get; set; }
 
         public NearestValueEventArgs(List<NearestValue> values)
         {
@@ -41,6 +40,7 @@ namespace Historical
         public int Position { get; set; }
         private VerticalLine MCrosshair;
         private AxisLine? LineBeingDragged = null;
+        private int PrevMouseX;
 
         public event EventHandler<NearestValueEventArgs> NearestValueEvent;
 
@@ -57,17 +57,27 @@ namespace Historical
         {
             var address = MRecord.Address;
             if (Points.x.Count == 0)
+            {
                 throw new InvalidOperationException($"{address}：点集空，不能添加图形");
+            }
 
             SetTitle();
             var plot = MFormsPlot.Plot;
+            //legend
             plot.Legend.Location = Alignment.UpperLeft;
             plot.Legend.IsVisible = true;
-            //legend
-            var subPlot = plot.Add.Scatter(Points.x.ToArray(), Points.y.ToArray());
+            //图形
+            var x_array = Points.x.ToArray();
+            var subPlot = plot.Add.Scatter(x_array, Points.y.ToArray());
             subPlot.Label = address;
-            MCrosshair = plot.Add.VerticalLine(0, color: ScottPlot.Color.FromHex("#FF0000"), width: 1);
+
+            //垂直尺
+            MCrosshair = plot.Add.VerticalLine(x_array[0].ToOADate(), color: ScottPlot.Color.FromHex("#FF0000"), width: 1);
             MCrosshair.IsDraggable = true;
+            
+            //自动缩放Axis
+            plot.Axes.AutoScaleX();
+
             //鼠标：按下
             MFormsPlot.MouseDown += (s, e) =>
             {
@@ -77,32 +87,44 @@ namespace Historical
                     LineBeingDragged = lineUnderMouse;
                     MFormsPlot.Interaction.Disable();
                 }
+                else
+                {
+                    PrevMouseX = e.X;
+                }
 
-
-                /*              Pixel mousePixel = new(e.X, e.Y);
-                                Coordinates mouseCoordinates = MFormsPlot.Plot.GetCoordinates(mousePixel);
-*/
             };
             //鼠标：松开
             MFormsPlot.MouseUp += (s, e) =>
             {
                 if (LineBeingDragged != null)
                 {
-                    var x = ((VerticalLine)LineBeingDragged).X;
+                    var x = ((VerticalLine)LineBeingDragged).X * MFormsPlot.Plot.ScaleFactor;
+
                     //事件传值给gridview
-                    var y = 0.0;
+                    //var y = 0.0;
+                    List<NearestValue> values = new();
                     foreach (var p in PlotArray)
                     {
                         var a = p.Value.Data.GetScatterPoints().ToList();
-                        y = FindNearestValue(a,x);
+                        var y = FindNearestValue(a, x);
+                        var dt_x = DateTime.FromOADate(x).ToString();
+                        values.Add(new NearestValue(p.Key, dt_x, y.ToString()));
                     }
 
-                    List<NearestValue> values = new();
-                    values.Add(new NearestValue(MRecord.Address, x.ToString(), y.ToString()));
                     OnRaiseNearestValueEvent(values);
-
+                    //释放
                     LineBeingDragged = null;
                 }
+                else
+                {
+                    //
+
+                    MCrosshair.X += e.X - PrevMouseX;
+                    MFormsPlot.Refresh();
+
+                }
+
+
                 MFormsPlot.Interaction.Enable();
 
             };
@@ -116,6 +138,7 @@ namespace Historical
                     var lineUnderMouse = GetLineUnderMouse(e.X, e.Y);
                     if (lineUnderMouse is null) MFormsPlot.Cursor = Cursors.Default;
                     else if (lineUnderMouse.IsDraggable && lineUnderMouse is VerticalLine) MFormsPlot.Cursor = Cursors.SizeWE;
+
                 }
                 else
                 {
@@ -128,6 +151,12 @@ namespace Historical
 
                     MFormsPlot.Refresh();
                 }
+            };
+
+            //缩放，平移
+            MFormsPlot.MouseWheel += (s, e) =>
+            {
+                Debug.WriteLine("scroll");
             };
 
             // 计算图形index
@@ -285,7 +314,7 @@ namespace Historical
                 return a[hi].Y;
             else if (x <= a[0].X)
                 return a[0].Y;
-            
+
             //二分法查找
             int pos = bisect_left(a, x, lo, hi);
             double x1 = a[pos - 1].X;

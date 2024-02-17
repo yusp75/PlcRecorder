@@ -119,7 +119,16 @@ namespace Historical
         //处理：显示最近值
         private void HandleNearestValueEvent(object? sender, NearestValueEventArgs e)
         {
-            var v = e;
+            dg1.Rows.Clear();
+            int i;
+            foreach (var v in e.Values)
+            {
+                i = dg1.Rows.Add();
+                dg1.Rows[i].Cells[0].Value = v.Address;
+                dg1.Rows[i].Cells[1].Value = v.X;
+                dg1.Rows[i].Cells[2].Value = v.Y;
+            }
+
         }
 
         //处理：删除图形
@@ -212,13 +221,7 @@ namespace Historical
         //事件：触发
         protected virtual void OnRaiseUpdateDataEvent(string address, MPoint poinsts)
         {
-            EventHandler<UpdateDataEventArgs> raiseEvent = UpdateDataEvent;
-            // Event will be null if there are no subscribers
-            if (raiseEvent != null)
-            {
-                // raise the event.
-                raiseEvent(this, new UpdateDataEventArgs(address, poinsts));
-            }
+            UpdateDataEvent?.Invoke(this, new UpdateDataEventArgs(address, poinsts));
         }
 
         //class

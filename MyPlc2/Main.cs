@@ -150,7 +150,6 @@ namespace MyPlc2
                 table1.Controls.Add(d);
 
                 vc.delePlot += DeletePlotHandler;
-
                 vc.AddStreamer();
             }
             catch (KeyNotFoundException ex)
