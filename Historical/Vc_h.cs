@@ -40,7 +40,7 @@ namespace Historical
         public int Position { get; set; }
         private VerticalLine MCrosshair;
         private AxisLine? LineBeingDragged = null;
-        private int PrevMouseX;
+        private double PrevMouseX;
 
         public event EventHandler<NearestValueEventArgs> NearestValueEvent;
 
@@ -89,7 +89,7 @@ namespace Historical
                 }
                 else
                 {
-                    PrevMouseX = e.X;
+                    PrevMouseX = MFormsPlot.Plot.GetCoordinates(e.X, e.Y).X; ;
                 }
 
             };
@@ -118,12 +118,11 @@ namespace Historical
                 else
                 {
                     //
-
-                    MCrosshair.X += e.X - PrevMouseX;
+                    var a = MFormsPlot.Plot.GetCoordinates(e.X, e.Y).X; 
+                    MCrosshair.X += a - PrevMouseX;
                     MFormsPlot.Refresh();
 
                 }
-
 
                 MFormsPlot.Interaction.Enable();
 
@@ -156,7 +155,7 @@ namespace Historical
             //缩放，平移
             MFormsPlot.MouseWheel += (s, e) =>
             {
-                Debug.WriteLine("scroll");
+                
             };
 
             // 计算图形index
